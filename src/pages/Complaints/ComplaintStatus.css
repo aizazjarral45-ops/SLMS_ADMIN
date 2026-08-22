@@ -1,0 +1,17 @@
+.complaint-status-feature {
+  min-width: 0;
+}
+.complaint-status-row {
+  align-items: center;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+@media (max-width: 600px) {
+  .complaint-status-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

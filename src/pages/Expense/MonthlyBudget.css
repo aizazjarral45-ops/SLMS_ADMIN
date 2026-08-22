@@ -1,0 +1,14 @@
+.budget-layout {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+  align-items: start;
+}
+.budget-layout .ant-progress {
+  margin: 14px 0 8px;
+}
+@media (max-width: 640px) {
+  .budget-layout {
+    grid-template-columns: 1fr;
+  }
+}

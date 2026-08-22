@@ -1,0 +1,37 @@
+.record-workspace {
+  border: 1px solid #e4eaf5;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(30, 58, 138, 0.05);
+}
+.record-workspace .ant-card-head {
+  min-height: 62px;
+}
+.record-workspace-actions .ant-input-search {
+  width: 220px;
+}
+.record-workspace .ant-table-wrapper {
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .record-workspace .ant-card-head {
+    align-items: flex-start;
+  }
+  .record-workspace .ant-card-head-wrapper {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .record-workspace .ant-card-extra {
+    width: 100%;
+    margin-inline-start: 0;
+  }
+  .record-workspace-actions {
+    width: 100%;
+  }
+  .record-workspace-actions .ant-input-search {
+    width: 100%;
+  }
+  .record-workspace-actions .ant-btn {
+    flex: 1;
+  }
+}

@@ -1,0 +1,159 @@
+.header {
+  align-items: center;
+  background: #1e3a8a;
+  color: #fff;
+  display: flex;
+  gap: 20px;
+  height: 100px;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-brand,
+.icons,
+.profile-parent {
+  align-items: center;
+  display: flex;
+}
+.header-brand {
+  min-width: 0;
+}
+.header-menu-toggle {
+  color: #fff !important;
+  display: none;
+  font-size: 24px;
+}
+.admin-wordmark {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 12px;
+  padding: 0;
+  text-align: left;
+}
+.admin-wordmark-mark {
+  align-items: center;
+  background: linear-gradient(135deg, #60a5fa, #dbeafe);
+  border-radius: 12px;
+  color: #1e3a8a;
+  display: inline-flex;
+  font-size: 24px;
+  font-weight: 800;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+.admin-wordmark strong {
+  display: block;
+  font-size: 21px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.admin-wordmark small {
+  color: #bfdbfe;
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin-top: 5px;
+}
+.icons {
+  color: #fff;
+  min-width: 0;
+}
+.header-icon-button {
+  color: #fff !important;
+  font-size: 22px;
+}
+.profile-parent {
+  gap: 10px;
+  min-width: 0;
+}
+.profile-avatar {
+  background: #dbeafe !important;
+  border: 2px solid #5770b7;
+  color: #1e3a8a !important;
+  font-weight: 700;
+}
+.header-profile-copy {
+  min-width: 0;
+}
+.student-name,
+.student-dept {
+  color: #fff !important;
+  display: block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.student-name {
+  font-size: 14px;
+}
+.student-dept {
+  color: #bfdbfe !important;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.header-notification-badge .ant-badge-count {
+  box-shadow: 0 0 0 2px #1e3a8a;
+  font-size: 10px;
+  min-width: 17px;
+}
+
+@media (max-width: 1023px) {
+  .header {
+    height: 88px;
+    padding: 0 16px;
+  }
+  .admin-wordmark strong {
+    font-size: 18px;
+  }
+  .icons {
+    gap: 4px !important;
+  }
+  .student-name,
+  .student-dept {
+    max-width: 120px;
+  }
+}
+@media (max-width: 767px) {
+  .header {
+    gap: 8px;
+    height: 68px;
+    padding: 0 10px;
+  }
+  .header-menu-toggle {
+    display: inline-flex;
+  }
+  .admin-wordmark {
+    gap: 8px;
+  }
+  .admin-wordmark-mark {
+    border-radius: 9px;
+    font-size: 18px;
+    height: 34px;
+    width: 34px;
+  }
+  .admin-wordmark strong {
+    font-size: 15px;
+  }
+  .admin-wordmark small,
+  .header-profile-copy,
+  .header-settings-button,
+  .header-logout-button {
+    display: none;
+  }
+  .header-icon-button {
+    font-size: 20px;
+    height: 38px;
+    padding: 0;
+    width: 38px;
+  }
+}

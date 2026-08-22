@@ -1,0 +1,12 @@
+.notification-list-feature {
+  min-width: 0;
+}
+.notification-unread {
+  background: #f5f9ff;
+  border-left: 3px solid #1677ff;
+  padding-left: 12px;
+}
+.notification-read {
+  border-left: 3px solid transparent;
+  padding-left: 12px;
+}
