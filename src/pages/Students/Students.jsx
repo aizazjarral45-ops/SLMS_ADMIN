@@ -31,6 +31,7 @@ export default function Students() {
       options: ["Active", "On hold", "Graduated"],
     },
   ];
+  
   const save = (row) =>
     commit(
       (current) => ({
@@ -81,7 +82,8 @@ export default function Students() {
               type="primary"
               onClick={() =>
                 document
-                  .querySelector(".record-workspace .ant-btn-primary")
+        
+                .querySelector(".record-workspace .ant-btn-primary")
                   ?.click()
               }
             >
@@ -117,15 +119,17 @@ export default function Students() {
         onSave={save}
         onDelete={remove}
         onView={(row) => navigate(`/students/${row.id}`)}
-        renderValue={(field, value) =>
-          field.name === "status" ? (
-            <Tag color={value === "Active" ? "green" : "gold"}>
-              {value || "Pending"}
-            </Tag>
-          ) : (
-            value || "—"
-          )
-        }
+        renderValue={(field, value) => {
+          if (field.name === "status") {
+            return (
+              <Tag color={value === "Active" ? "green" : "gold"}>
+                {value ?? "Pending"}
+              </Tag>
+            );
+          }
+
+          return value ?? "—";
+        }}
       />
     </div>
   );

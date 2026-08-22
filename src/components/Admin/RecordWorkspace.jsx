@@ -18,10 +18,14 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { idOf, makeId, tagColor } from "../../lib/adminWorkspace";
 import "./RecordWorkspace.css";
 
-function FieldControl({ field }) {
+function FieldControl({ field, value, onChange }) {
+  const handleValue = (nextValue) => onChange?.(nextValue);
+
   if (field.type === "select")
     return (
       <Select
+        value={value ?? undefined}
+        onChange={handleValue}
         options={(field.options || []).map((item) =>
           typeof item === "object"
             ? item
@@ -30,9 +34,29 @@ function FieldControl({ field }) {
       />
     );
   if (field.type === "number")
-    return <InputNumber min={field.min ?? 0} style={{ width: "100%" }} />;
-  if (field.type === "textarea") return <Input.TextArea rows={3} />;
-  return <Input type={field.type === "date" ? "date" : "text"} />;
+    return (
+      <InputNumber
+        min={field.min ?? 0}
+        style={{ width: "100%" }}
+        value={value ?? undefined}
+        onChange={handleValue}
+      />
+    );
+  if (field.type === "textarea")
+    return (
+      <Input.TextArea
+        rows={3}
+        value={value ?? ""}
+        onChange={(event) => handleValue(event.target.value)}
+      />
+    );
+  return (
+    <Input
+      type={field.type === "date" ? "date" : "text"}
+      value={value ?? ""}
+      onChange={(event) => handleValue(event.target.value)}
+    />
+  );
 }
 
 export default function RecordWorkspace({
@@ -58,9 +82,18 @@ export default function RecordWorkspace({
         )
       : rows;
   }, [query, rows]);
+  const resetForm = () => {
+    setTimeout(() => {
+      try {
+        form.resetFields();
+      } catch {
+        // Ignore reset before the modal is mounted.
+      }
+    }, 0);
+  };
   const startCreate = () => {
-    form.resetFields();
     setEditing({});
+    resetForm();
   };
   const save = (values) => {
     const old = editing || {};
@@ -68,21 +101,34 @@ export default function RecordWorkspace({
     onSave({ ...old, ...values, id });
     messageApi.success(idOf(old) ? "Record updated." : "Record created.");
     setEditing(null);
-    form.resetFields();
+    resetForm();
   };
+  const displayValue = (field, value, row) => {
+    const empty = value === null || value === undefined || value === "";
+    if (empty) {
+      if (field.name === "status") return "Pending";
+      return "—";
+    }
+
+    return value;
+  };
+
   const columns = [
     ...fields.slice(0, 6).map((field) => ({
       title: field.short || field.label,
       dataIndex: field.name,
       key: field.name,
       ellipsis: true,
-      render: (value, row) =>
-        renderValue?.(field, value, row) ||
-        (field.name === "status" ? (
-          <Tag color={tagColor(value)}>{value || "Pending"}</Tag>
+      render: (value, row) => {
+        const explicit = renderValue?.(field, value, row);
+        if (explicit !== undefined && explicit !== null && explicit !== "") return explicit;
+        const display = displayValue(field, value, row);
+        return field.name === "status" ? (
+          <Tag color={tagColor(value)}>{display}</Tag>
         ) : (
-          value || "—"
-        )),
+          display
+        );
+      },
     })),
     {
       title: "Actions",
@@ -167,7 +213,7 @@ export default function RecordWorkspace({
         open={editing !== null}
         onCancel={() => {
           setEditing(null);
-          form.resetFields();
+          resetForm();
         }}
         onOk={() => form.submit()}
         okText="Save"

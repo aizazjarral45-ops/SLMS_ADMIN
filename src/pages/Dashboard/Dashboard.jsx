@@ -79,77 +79,63 @@ export default function Dashboard() {
     };
   }, [admin.rooms, data]);
   const activity = useMemo(() => {
-    const shared = (data.activity || [])
-      .slice(0, 8)
-      .map((row) => ({
-        title: row.title || "Admin activity",
-        detail: row.module || "Updated",
-        tag: row.module || "Admin",
-        route:
-          row.module === "academic"
-            ? "/academic"
-            : row.module === "hostel"
-              ? "/hostel"
-              : row.module === "expense"
-                ? "/expense"
-                : row.module === "complaints"
-                  ? "/complaints"
-                  : row.module === "students"
-                    ? "/students"
-                    : row.module === "ai"
-                      ? "/copilot"
-                      : null,
-        createdAt: row.createdAt,
-      }));
+    const shared = (data.activity || []).slice(0, 8).map((row) => ({
+      title: row.title || "Admin activity",
+      detail: row.module || "Updated",
+      tag: row.module || "Admin",
+      route:
+        row.module === "academic"
+          ? "/academic"
+          : row.module === "hostel"
+            ? "/hostel"
+            : row.module === "expense"
+              ? "/expense"
+              : row.module === "complaints"
+                ? "/complaints"
+                : row.module === "students"
+                  ? "/students"
+                  : row.module === "ai"
+                    ? "/copilot"
+                    : null,
+      createdAt: row.createdAt,
+    }));
     const fallback = [
-      ...(data.academic?.assignments || [])
-        .slice(0, 2)
-        .map((row) => ({
-          title: row.title || "Assignment",
-          detail: row.status || "To do",
-          tag: "Academic",
-          route: "/academic",
-        })),
-      ...(data.complaints || [])
-        .slice(0, 2)
-        .map((row) => ({
-          title: row.title || "Complaint",
-          detail: row.status || "Submitted",
-          tag: "Support",
-          route: "/complaints",
-        })),
-      ...(data.notifications || [])
-        .slice(0, 2)
-        .map((row) => ({
-          title: row.title || "Notification",
-          detail: row.type || "Alert",
-          tag: "Notifications",
-          route: "/notifications",
-        })),
-      ...(data.expenses || [])
-        .slice(0, 2)
-        .map((row) => ({
-          title: row.title || "Expense update",
-          detail: row.status || "Logged",
-          tag: "Expense",
-          route: "/expense",
-        })),
-      ...(data.hostelApplications || [])
-        .slice(0, 2)
-        .map((row) => ({
-          title: row.fullName || "Hostel activity",
-          detail: row.status || "Submitted",
-          tag: "Hostel",
-          route: "/hostel",
-        })),
-      ...(data.academic?.attendance || [])
-        .slice(0, 2)
-        .map((row) => ({
-          title: `${row.course || "Course"} attendance`,
-          detail: `${row.attended || 0}/${row.total || 0} classes`,
-          tag: "Attendance",
-          route: "/academic",
-        })),
+      ...(data.academic?.assignments || []).slice(0, 2).map((row) => ({
+        title: row.title || "Assignment",
+        detail: row.status || "To do",
+        tag: "Academic",
+        route: "/academic",
+      })),
+      ...(data.complaints || []).slice(0, 2).map((row) => ({
+        title: row.title || "Complaint",
+        detail: row.status || "Submitted",
+        tag: "Support",
+        route: "/complaints",
+      })),
+      ...(data.notifications || []).slice(0, 2).map((row) => ({
+        title: row.title || "Notification",
+        detail: row.type || "Alert",
+        tag: "Notifications",
+        route: "/notifications",
+      })),
+      ...(data.expenses || []).slice(0, 2).map((row) => ({
+        title: row.title || "Expense update",
+        detail: row.status || "Logged",
+        tag: "Expense",
+        route: "/expense",
+      })),
+      ...(data.hostelApplications || []).slice(0, 2).map((row) => ({
+        title: row.fullName || "Hostel activity",
+        detail: row.status || "Submitted",
+        tag: "Hostel",
+        route: "/hostel",
+      })),
+      ...(data.academic?.attendance || []).slice(0, 2).map((row) => ({
+        title: `${row.course || "Course"} attendance`,
+        detail: `${row.attended || 0}/${row.total || 0} classes`,
+        tag: "Attendance",
+        route: "/academic",
+      })),
     ];
     return [...shared, ...fallback].slice(0, 8);
   }, [data]);
@@ -158,7 +144,7 @@ export default function Dashboard() {
       <section className="dashboard-hero-card">
         <div>
           <Tag className="dashboard-eyebrow" icon={<CheckCircleOutlined />}>
-            ADMIN CONTROL CENTER
+            ADMIN DASHBOARD
           </Tag>
           <Title className="dashboard-title">
             A clear view of your campus operations.
@@ -242,7 +228,7 @@ export default function Dashboard() {
         </Col>
       </Row>
       <Row gutter={[16, 16]} className="dashboard-content-grid">
-        <Col xs={24} lg={15}>
+        <Col xs={24} lg={24}>
           <Card className="dashboard-card" title="Operational pulse">
             <div className="dashboard-panel-section">
               <div className="dashboard-section-heading">
@@ -315,7 +301,7 @@ export default function Dashboard() {
             </div>
           </Card>
         </Col>
-        <Col xs={24} lg={9}>
+        <Col xs={24} lg={24}>
           <Card className="dashboard-card" title="Quick actions">
             <div className="dashboard-actions">
               {[

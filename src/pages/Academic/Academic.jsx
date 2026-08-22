@@ -88,17 +88,17 @@ function Overview({ data, setPanel }) {
       )
     : 0;
   const cards = [
-    ["Courses", academic.courses?.length || 0, <BookOutlined />, "courses"],
+    ["Courses", academic.courses?.length ?? 0, <BookOutlined />, "courses"],
     [
       "Assignments",
-      academic.assignments?.length || 0,
+      academic.assignments?.length ?? 0,
       <FileTextOutlined />,
       "assignments",
     ],
-    ["Exams", academic.exams?.length || 0, <CheckCircleOutlined />, "exams"],
+    ["Exams", academic.exams?.length ?? 0, <CheckCircleOutlined />, "exams"],
     [
       "Current CGPA",
-      academic.profile?.cgpa || "—",
+      academic.profile?.cgpa ?? "—",
       <BarChartOutlined />,
       "results",
     ],
