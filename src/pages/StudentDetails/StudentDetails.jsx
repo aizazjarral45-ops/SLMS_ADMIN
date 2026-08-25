@@ -24,6 +24,13 @@ function RelatedTable({
   return (
     <Card
       className="admin-panel student-related-card"
+      style={{
+        height: 360,
+        marginBottom: 24,
+        display: "flex",
+        flexDirection: "column",
+      }}
+      styles={{ body: { flex: 1, minHeight: 0, overflow: "auto" } }}
       title={
         <span>
           {icon} {title}
@@ -133,7 +140,7 @@ export default function StudentDetails() {
           </Descriptions.Item>
         </Descriptions>
       </Card>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
           <RelatedTable
             title="Courses"

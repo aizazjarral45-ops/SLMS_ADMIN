@@ -46,7 +46,7 @@ export default function Settings() {
         </div>
       </section>
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={14}>
+        <Col xs={24} lg={24}>
           <Card className="admin-panel" title="Workspace preferences">
             <Form
               form={form}
@@ -93,16 +93,6 @@ export default function Settings() {
                 Save settings
               </Button>
             </Form>
-          </Card>
-        </Col>
-        <Col xs={24} lg={10}>
-          <Card className="admin-panel" title="Data connection">
-            <Alert
-              showIcon
-              type="info"
-              message="Shared SLMS data is active"
-              description="All Admin modules use the shared local workspace and unique module keys, ready for a later API connection."
-            />
           </Card>
         </Col>
       </Row>
