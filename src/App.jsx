@@ -43,6 +43,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import Users from "./pages/Users/Users";
 import Settings from "./pages/Settings/Settings";
 import Profile from "./pages/Profile/Profile";
+import NotFound from "./pages/NotFound";
 
 const { Title, Paragraph } = Typography;
 const MOBILE_BREAKPOINT = 768;
@@ -289,7 +290,7 @@ function AppRoutes() {
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

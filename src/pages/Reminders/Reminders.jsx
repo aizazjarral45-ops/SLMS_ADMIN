@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { Button, Space, Tag } from "antd";
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
@@ -13,6 +14,7 @@ import "./Reminders.css";
 export default function Reminders({ embedded = false }) {
   const navigate = useNavigate();
   const { data, commit } = useAdminWorkspace();
+  const workspaceRef = useRef();
   const fields = [
     { name: "title", label: "Reminder title", required: true },
     { name: "type", label: "Type" },
@@ -70,14 +72,7 @@ export default function Reminders({ embedded = false }) {
               notification workspace.
             </p>
             <Space wrap>
-              <Button
-                type="primary"
-                onClick={() =>
-                  document
-                    .querySelector(".record-workspace .ant-btn-primary")
-                    ?.click()
-                }
-              >
+              <Button type="primary" onClick={() => workspaceRef.current?.openCreate()}>
                 Add reminder
               </Button>
               <Button
@@ -108,6 +103,7 @@ export default function Reminders({ embedded = false }) {
         </section>
       )}
       <RecordWorkspace
+        ref={workspaceRef}
         title="Reminder records"
         rows={data.settings?.reminders || []}
         fields={fields}

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import { TeamOutlined } from "@ant-design/icons";
 import { Button, Space, Tag } from "antd";
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
@@ -13,6 +14,7 @@ import "./Students.css";
 export default function Students() {
   const navigate = useNavigate();
   const { data, commit } = useAdminWorkspace();
+  const workspaceRef = useRef();
   const fields = [
     { name: "name", label: "Student name", required: true },
     { name: "email", label: "Email", required: true },
@@ -78,15 +80,7 @@ export default function Students() {
             record.
           </p>
           <Space wrap>
-            <Button
-              type="primary"
-              onClick={() =>
-                document
-        
-                .querySelector(".record-workspace .ant-btn-primary")
-                  ?.click()
-              }
-            >
+            <Button type="primary" onClick={() => workspaceRef.current?.openCreate()}>
               Add student
             </Button>
             <Button
@@ -112,6 +106,7 @@ export default function Students() {
         </div>
       </section>
       <RecordWorkspace
+        ref={workspaceRef}
         title="Student records"
         rows={data.admin?.students || []}
         fields={fields}

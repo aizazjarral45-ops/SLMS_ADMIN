@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState, useImperativeHandle } from "react";
 import {
   Button,
   Card,
@@ -59,7 +59,7 @@ function FieldControl({ field, value, onChange }) {
   );
 }
 
-export default function RecordWorkspace({
+const RecordWorkspace = React.forwardRef(function RecordWorkspace({
   title,
   rows = [],
   fields,
@@ -95,6 +95,11 @@ export default function RecordWorkspace({
     setEditing({});
     resetForm();
   };
+
+  // Expose a programmatic handle so parent pages can open the create modal
+  useImperativeHandle(ref, () => ({
+    openCreate: startCreate,
+  }), [ref]);
   const save = (values) => {
     const old = editing || {};
     const id = idOf(old) || makeId(prefix);
