@@ -1,0 +1,92 @@
+.settings-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-summary-card {
+  height: 100%;
+}
+
+.settings-summary-top {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.settings-summary-icon {
+  align-items: center;
+  background: #dbeafe;
+  border-radius: 12px;
+  color: #1e3a8a;
+  display: inline-flex;
+  font-size: 22px;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
+.settings-card-tag {
+  background: rgba(30, 58, 138, 0.08) !important;
+  border-color: rgba(30, 58, 138, 0.15) !important;
+  color: #1e3a8a !important;
+}
+
+.settings-summary-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.settings-summary-value {
+  display: block;
+  color: #0f172a;
+  font-size: 1.3rem;
+  margin: 10px 0 6px;
+}
+
+.settings-summary-detail {
+  color: #475569;
+  margin: 0 0 10px;
+}
+
+.settings-overview-card .ant-card-head {
+  min-height: 58px;
+}
+
+.settings-overview-row {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.settings-overview-row strong {
+  display: block;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.settings-overview-row p {
+  color: #475569;
+  margin: 0;
+}
+
+.settings-overview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 576px) {
+  .settings-overview-actions {
+    flex-direction: column;
+  }
+
+  .settings-overview-actions .ant-btn {
+    width: 100%;
+  }
+}

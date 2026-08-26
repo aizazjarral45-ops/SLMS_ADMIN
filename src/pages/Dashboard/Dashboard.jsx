@@ -163,7 +163,7 @@ export default function Dashboard() {
             </Button>
             <Button
               className="dashboard-secondary-btn"
-              onClick={() => navigate("/analytics")}
+              onClick={() => navigate("/settings/analytics")}
             >
               View analytics
             </Button>

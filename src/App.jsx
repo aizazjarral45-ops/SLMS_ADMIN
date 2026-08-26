@@ -40,9 +40,6 @@ import Hostel from "./pages/Hostel/Hostel";
 import Expense from "./pages/Expense/Expense";
 import Complaints from "./pages/Complaints/Complaints";
 import Notifications from "./pages/Notifications/Notifications";
-import Reminders from "./pages/Reminders/Reminders";
-
-import Analytics from "./pages/Analytics/Analytics";
 import Users from "./pages/Users/Users";
 import Settings from "./pages/Settings/Settings";
 import Profile from "./pages/Profile/Profile";
@@ -284,11 +281,11 @@ function AppRoutes() {
           <Route path="/complaints/:panel" element={<Complaints />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/notifications/:panel" element={<Notifications />} />
-          <Route path="/reminders" element={<Reminders />} />
-        
-          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/reminders" element={<Navigate to="/settings/reminders" replace />} />
+          <Route path="/analytics" element={<Navigate to="/settings/analytics" replace />} />
           <Route path="/users" element={<Users />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/settings/:panel" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>

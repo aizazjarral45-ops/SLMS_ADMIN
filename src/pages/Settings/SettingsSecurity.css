@@ -1,0 +1,32 @@
+.settings-security {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-security-status {
+  height: 100%;
+}
+
+.security-status-icon {
+  margin-bottom: 16px;
+}
+
+.settings-security-status h3 {
+  color: #0f172a;
+  margin: 14px 0 8px;
+}
+
+.settings-security-status p {
+  color: #475569;
+}
+
+.settings-security-status ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: #334155;
+}
+
+.settings-security-status li + li {
+  margin-top: 8px;
+}

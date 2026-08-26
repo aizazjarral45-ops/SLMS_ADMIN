@@ -1,9 +1,6 @@
 import {
   AppstoreOutlined,
-  BarChartOutlined,
-  BellOutlined,
   BookOutlined,
-  FileTextOutlined,
   HomeOutlined,
   RobotOutlined,
   SafetyCertificateOutlined,
@@ -27,8 +24,6 @@ const navigationItems = [
     icon: <SafetyCertificateOutlined />,
     label: "Complaints",
   },
-  { key: "/reminders", icon: <FileTextOutlined />, label: "Reminders" },
-  { key: "/analytics", icon: <BarChartOutlined />, label: "Analytics" },
   { key: "/users", icon: <UserOutlined />, label: "Users" },
   { key: "/profile", icon: <UserOutlined />, label: "Profile" },
   { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
@@ -37,6 +32,7 @@ const navigationItems = [
 function getSelectedKey(pathname) {
   if (pathname.startsWith("/students/")) return "/students";
   if (pathname.startsWith("/complaints/")) return "/complaints";
+  if (pathname.startsWith("/settings/")) return "/settings";
   return pathname;
 }
 

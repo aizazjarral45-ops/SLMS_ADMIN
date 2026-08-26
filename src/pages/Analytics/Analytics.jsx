@@ -18,7 +18,7 @@ function Stat({ title, value, icon, hint }) {
     </Card>
   );
 }
-export default function Analytics() {
+export default function Analytics({ embedded = false }) {
   const navigate = useNavigate();
   const { data } = useAdminWorkspace();
   const attendanceRows = data.academic?.attendance || [];
@@ -77,35 +77,37 @@ export default function Analytics() {
     ],
   ];
   return (
-    <div className="admin-page analytics-page">
-      <section className="module-hero">
-        <div>
-          <Tag className="dashboard-eyebrow">REPORTING</Tag>
-          <h1>Analytics</h1>
-          <p>A visual operational summary from connected SLMS records.</p>
-          <Space wrap>
-            <Button type="primary" onClick={() => navigate("/students")}>
-              Review student data
-            </Button>
-            <Button
-              className="dashboard-secondary-btn"
-              onClick={() => navigate("/")}
-            >
-              Back to dashboard
-            </Button>
-          </Space>
-        </div>
-        <div className="module-hero-panel">
-          <div className="module-hero-icon">
-            <BarChartOutlined />
+    <div className={`admin-page analytics-page${embedded ? " analytics-page-embedded" : ""}`}>
+      {!embedded && (
+        <section className="module-hero">
+          <div>
+            <Tag className="dashboard-eyebrow">REPORTING</Tag>
+            <h1>Analytics</h1>
+            <p>A visual operational summary from connected SLMS records.</p>
+            <Space wrap>
+              <Button type="primary" onClick={() => navigate("/students")}>
+                Review student data
+              </Button>
+              <Button
+                className="dashboard-secondary-btn"
+                onClick={() => navigate("/")}
+              >
+                Back to dashboard
+              </Button>
+            </Space>
           </div>
-          <h3>Live indicators</h3>
-          <span>Metrics update as module data changes.</span>
-          <Button type="link" onClick={() => navigate("/notifications")}>
-            Review alerts
-          </Button>
-        </div>
-      </section>
+          <div className="module-hero-panel">
+            <div className="module-hero-icon">
+              <BarChartOutlined />
+            </div>
+            <h3>Live indicators</h3>
+            <span>Metrics update as module data changes.</span>
+            <Button type="link" onClick={() => navigate("/notifications")}>
+              Review alerts
+            </Button>
+          </div>
+        </section>
+      )}
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>
           <Stat

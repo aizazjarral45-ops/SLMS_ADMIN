@@ -1,101 +1,126 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Alert, Button, Card, Col, Form, Row, Space, Switch, Tag } from "antd";
-import { SaveOutlined, SettingOutlined } from "@ant-design/icons";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Button, Tag } from "antd";
+import { SettingOutlined } from "@ant-design/icons";
 import { useAdminWorkspace } from "../../lib/adminWorkspace";
 import "../../components/Admin/AdminShared.css";
 import "./Settings.css";
+import SettingsOverview from "./SettingsOverview";
+import SettingsAnalytics from "./SettingsAnalytics";
+import SettingsReminders from "./SettingsReminders";
+import SettingsSecurity from "./SettingsSecurity";
+
+const panels = [
+  { key: "overview", label: "Settings Overview" },
+  { key: "analytics", label: "Analytics" },
+  { key: "reminders", label: "Reminders" },
+  { key: "security", label: "Security" },
+];
+
+const normalizePanel = (value) =>
+  panels.some((panel) => panel.key === value) ? value : "overview";
+
 export default function Settings() {
+  const location = useLocation();
   const navigate = useNavigate();
-  const { data, commit } = useAdminWorkspace();
-  const [form] = Form.useForm();
-  const preferences = data.admin?.preferences;
+  const { panel: routePanel } = useParams();
+  const { data } = useAdminWorkspace();
+  const [panel, setPanel] = useState(() => normalizePanel(location.state?.panel || routePanel || "overview"));
+
   useEffect(() => {
-    form.setFieldsValue(preferences || {});
-  }, [form, preferences]);
+    const nextPanel = normalizePanel(location.state?.panel || routePanel || "overview");
+    setPanel(nextPanel);
+  }, [location.state?.panel, routePanel]);
+
+  const handlePanelChange = (nextPanel) => {
+    const normalized = normalizePanel(nextPanel);
+    setPanel(normalized);
+    navigate(`/settings/${normalized}`, { replace: false });
+  };
+
+  const reminderCount = useMemo(
+    () =>
+      (data?.settings?.reminders || []).filter(
+        (row) => row.done !== "Done" && row.done !== true,
+      ).length,
+    [data],
+  );
+
+  const summary = useMemo(() => {
+    const security = data?.settings?.security || {};
+    const activeModules = [
+      !!(data?.settings?.notifications && Object.values(data.settings.notifications).some(Boolean)),
+      !!(data?.settings?.security && Object.keys(security).length),
+      reminderCount > 0,
+    ].filter(Boolean).length;
+
+    return {
+      securityStatus: security.mfaEnabled ? "Protected" : "Review required",
+      activeModules,
+      reminderCount,
+    };
+  }, [data, reminderCount]);
+
+  const content = (() => {
+    switch (panel) {
+      case "analytics":
+        return <SettingsAnalytics />;
+      case "reminders":
+        return <SettingsReminders />;
+      case "security":
+        return <SettingsSecurity />;
+      case "overview":
+      default:
+        return <SettingsOverview data={data} onSelectPanel={handlePanelChange} />;
+    }
+  })();
+
   return (
     <div className="admin-page settings-page">
       <section className="module-hero">
         <div>
           <Tag className="dashboard-eyebrow">ADMINISTRATION</Tag>
           <h1>Settings</h1>
-          <p>Tune administrative workspace preferences and data behavior.</p>
-          <Space wrap>
-            <Button type="primary" onClick={() => form.submit()}>
-              Save preferences
+          <p>
+            Manage the platform, communication preferences, reporting, and
+            security controls from a single workspace.
+          </p>
+          <div className="settings-hero-actions">
+            <Button type="primary" onClick={() => handlePanelChange("overview")}>
+              Settings overview
             </Button>
-            <Button
-              className="dashboard-secondary-btn"
-              onClick={() =>
-                navigate("/notifications", { state: { panel: "preferences" } })
-              }
-            >
-              Notification preferences
+            <Button className="dashboard-secondary-btn" onClick={() => handlePanelChange("security")}>
+              Security controls
             </Button>
-          </Space>
+          </div>
         </div>
         <div className="module-hero-panel">
           <div className="module-hero-icon">
             <SettingOutlined />
           </div>
-          <h3>Workspace configuration</h3>
-          <span>Preferences persist in the Admin local workspace.</span>
-          <Button type="link" onClick={() => navigate("/")}>
-            Back to dashboard
+          <h3>Workspace status</h3>
+          <span>
+            {summary.securityStatus} · {summary.activeModules} modules active
+          </span>
+          <Button type="link" onClick={() => handlePanelChange("analytics")}>
+            Review analytics
           </Button>
         </div>
       </section>
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={24}>
-          <Card className="admin-panel" title="Workspace preferences">
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={(values) =>
-                commit(
-                  (current) => ({
-                    ...current,
-                    admin: {
-                      ...current.admin,
-                      preferences: { ...current.admin.preferences, ...values },
-                    },
-                  }),
-                  {
-                    module: "settings",
-                    title: "Workspace preferences saved",
-                    notify: false,
-                  },
-                )
-              }
-            >
-              <Form.Item
-                name="compactTables"
-                label="Compact table density"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item
-                name="weeklyDigest"
-                label="Weekly operational digest"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item
-                name="autoAssignComplaints"
-                label="Auto-assign new complaints"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Button type="primary" icon={<SaveOutlined />} htmlType="submit">
-                Save settings
-              </Button>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+
+      <nav className="module-tabs" aria-label="Settings workspaces">
+        {panels.map((item) => (
+          <Button
+            key={item.key}
+            type={panel === item.key ? "primary" : "default"}
+            onClick={() => handlePanelChange(item.key)}
+          >
+            {item.label}
+          </Button>
+        ))}
+      </nav>
+
+      {content}
     </div>
   );
 }

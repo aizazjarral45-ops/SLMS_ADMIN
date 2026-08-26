@@ -164,6 +164,15 @@ const defaultSettings = {
   },
   reminders: [],
   readNotificationIds: [],
+  security: {
+    mfaEnabled: true,
+    sessionTimeoutMinutes: 30,
+    passwordRotationDays: 90,
+    loginAlerts: true,
+    auditLogging: true,
+    suspiciousActivityBlocking: true,
+    passwordPolicy: "High",
+  },
   aiSettings: {
     studyPlanner: true,
     budgetWarnings: true,
@@ -262,6 +271,10 @@ export const normalizeSharedData = (value) => {
       readNotificationIds: asArray(settings.readNotificationIds).filter(
         (id) => typeof id === "string",
       ),
+      security: {
+        ...defaultSettings.security,
+        ...asObject(settings.security),
+      },
       aiSettings: {
         ...defaultSettings.aiSettings,
         ...asObject(settings.aiSettings),
