@@ -225,8 +225,8 @@ function AdminShell() {
   }, [data, updateData]);
 
   const unreadCount = useMemo(() => {
-    const notifications = data.notifications || [];
-    const readIds = (data.settings && data.settings.readNotificationIds) || [];
+    const notifications = data?.notifications || [];
+    const readIds = data?.settings?.readNotificationIds || [];
     return notifications.filter((n) => !readIds.includes(n.id)).length;
   }, [data]);
 
