@@ -99,3 +99,20 @@ body {
     padding: 8px;
   }
 }
+
+/* Global loading overlay */
+.loading-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff, #f3f4f6);
+}
+.loading-center {
+  max-width: 460px;
+  width: 90%;
+  padding: 32px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(16, 24, 40, 0.08);
+}

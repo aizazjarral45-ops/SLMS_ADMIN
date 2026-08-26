@@ -9,6 +9,7 @@ import {
   Input,
   Typography,
   message,
+  Spin,
 } from "antd";
 import { CloseOutlined, LockOutlined } from "@ant-design/icons";
 import {
@@ -116,7 +117,12 @@ function AdminShell() {
     }
   }, []);
 
+  const [globalLoading, setGlobalLoading] = useState(false);
+
   const updateData = useCallback((nextValue) => {
+    // Show a brief loading indicator while persisting updates
+    setGlobalLoading(true);
+    // Persist and update
     setData((current) => {
       const nextRaw =
         typeof nextValue === "function" ? nextValue(current) : nextValue;
@@ -183,6 +189,9 @@ function AdminShell() {
 
       return next;
     });
+
+    // Hide the loading indicator shortly after update completes
+    setTimeout(() => setGlobalLoading(false), 180);
   }, []);
 
   useEffect(() => {
@@ -230,7 +239,7 @@ function AdminShell() {
     return notifications.filter((n) => !readIds.includes(n.id)).length;
   }, [data]);
 
-  if (initialLoading || !data) {
+  if (initialLoading || !data || globalLoading) {
     // Global initial loading screen (keeps Dashboard design language)
     return (
       <div className="app-shell loading-shell">
@@ -244,14 +253,7 @@ function AdminShell() {
             <h2 style={{ margin: 0, color: "#1e3a8a" }}>SLMS Admin</h2>
             <p style={{ color: "#6b7280" }}>Preparing admin workspace…</p>
             <div style={{ marginTop: 16 }}>
-              <span className="ant-spin">
-                <span className="ant-spin-dot ant-spin-dot-spin">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </span>
+              <Spin size="large" />
             </div>
           </div>
         </div>
