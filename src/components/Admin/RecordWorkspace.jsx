@@ -18,6 +18,8 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { idOf, makeId, tagColor } from "../../lib/adminWorkspace";
 import "./RecordWorkspace.css";
 
+import { useCallback } from "react";
+
 function FieldControl({ field, value, onChange }) {
   const handleValue = (nextValue) => onChange?.(nextValue);
 
@@ -83,7 +85,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
         )
       : rows;
   }, [query, rows]);
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setTimeout(() => {
       try {
         form.resetFields();
@@ -91,16 +93,20 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
         // Ignore reset before the modal is mounted.
       }
     }, 0);
-  };
-  const startCreate = () => {
+  }, [form]);
+
+  const startCreate = useCallback(() => {
     setEditing({});
     resetForm();
-  };
+  }, [resetForm]);
 
   // Expose a programmatic handle so parent pages can open the create modal
   useImperativeHandle(ref, () => ({
     openCreate: startCreate,
-  }), [ref]);
+  }), [startCreate]);
+
+  // Display value helper (row parameter removed because it's unused)
+
   const save = (values) => {
     const old = editing || {};
     const id = idOf(old) || makeId(prefix);
@@ -109,7 +115,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
     setEditing(null);
     resetForm();
   };
-  const displayValue = (field, value, row) => {
+  const displayValue = (field, value) => {
     const empty = value === null || value === undefined || value === "";
     if (empty) {
       if (field.name === "status") return "Pending";

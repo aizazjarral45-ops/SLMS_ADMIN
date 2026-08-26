@@ -104,10 +104,11 @@ function AdminShell() {
   useEffect(() => {
     try {
       const loaded = loadSharedData();
-      setData(loaded);
+      // Defer setState to avoid synchronous state updates within the effect
+      setTimeout(() => setData(loaded), 0);
     } catch (e) {
       // Fall back to empty normalized data
-      setData(loadSharedData());
+      setTimeout(() => setData(loadSharedData()), 0);
       console.error("Failed to load shared data:", e);
     } finally {
       // Defer removal of loading to ensure a smooth transition
