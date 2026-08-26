@@ -97,7 +97,23 @@ function AdminShell() {
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth < MOBILE_BREAKPOINT,
   );
-  const [data, setData] = useState(loadSharedData);
+  const [data, setData] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Load shared data on mount (kept synchronous but wrapped to allow a loading UI)
+  useEffect(() => {
+    try {
+      const loaded = loadSharedData();
+      setData(loaded);
+    } catch (e) {
+      // Fall back to empty normalized data
+      setData(loadSharedData());
+      console.error("Failed to load shared data:", e);
+    } finally {
+      // Defer removal of loading to ensure a smooth transition
+      setTimeout(() => setInitialLoading(false), 120);
+    }
+  }, []);
 
   const updateData = useCallback((nextValue) => {
     setData((current) => {
@@ -212,6 +228,35 @@ function AdminShell() {
     const readIds = (data.settings && data.settings.readNotificationIds) || [];
     return notifications.filter((n) => !readIds.includes(n.id)).length;
   }, [data]);
+
+  if (initialLoading || !data) {
+    // Global initial loading screen (keeps Dashboard design language)
+    return (
+      <div className="app-shell loading-shell">
+        <div className="loading-center">
+          <div style={{ textAlign: "center" }}>
+            <img
+              src="/Sitelogo.png"
+              alt="SLMS"
+              style={{ width: 96, height: 96, marginBottom: 16 }}
+            />
+            <h2 style={{ margin: 0, color: "#1e3a8a" }}>SLMS Admin</h2>
+            <p style={{ color: "#6b7280" }}>Preparing admin workspace…</p>
+            <div style={{ marginTop: 16 }}>
+              <span className="ant-spin">
+                <span className="ant-spin-dot ant-spin-dot-spin">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
