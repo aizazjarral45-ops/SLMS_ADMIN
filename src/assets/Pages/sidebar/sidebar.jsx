@@ -6,7 +6,6 @@ import {
   SafetyCertificateOutlined,
   SettingOutlined,
   TeamOutlined,
-  UserOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
 import { Menu } from "antd";
@@ -24,8 +23,8 @@ const navigationItems = [
     icon: <SafetyCertificateOutlined />,
     label: "Complaints",
   },
-  { key: "/users", icon: <UserOutlined />, label: "Users" },
-  { key: "/profile", icon: <UserOutlined />, label: "Profile" },
+  // { key: "/users", icon: <UserOutlined />, label: "Users" },
+  // { key: "/profile", icon: <UserOutlined />, label: "Profile" },
   { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
 ];
 
