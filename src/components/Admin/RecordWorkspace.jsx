@@ -249,4 +249,6 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
       </Modal>
     </Card>
   );
-}
+});
+
+export default RecordWorkspace;
