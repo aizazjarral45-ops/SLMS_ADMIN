@@ -69,7 +69,8 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
   onView,
   addText,
   renderValue,
-}) {
+  additionalRowActions,
+}, ref) {
   const [form] = Form.useForm();
   const [editing, setEditing] = useState(null);
   const [query, setQuery] = useState("");
@@ -147,6 +148,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
               View
             </Button>
           ) : null}
+          {additionalRowActions ? additionalRowActions(row) : null}
           <Button
             type="text"
             size="small"

@@ -5,6 +5,7 @@ import {
   saveRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
+import { Button, Space, Popconfirm } from "antd";
 import "./Applications.css";
 
 export default function Applications() {
@@ -65,6 +66,41 @@ export default function Applications() {
         studentId: row.studentId,
       },
     );
+
+  const approve = (row) =>
+    commit(
+      (current) => ({
+        ...current,
+        hostelApplications: current.hostelApplications.map((item) =>
+          item.id === row.id ? { ...item, status: "Approved", updatedAt: new Date().toISOString() } : item,
+        ),
+      }),
+      {
+        module: "hostel",
+        title: `${row.fullName || "Hostel"} application approved`,
+        studentId: row.studentId,
+        refId: row.id,
+        notify: true,
+      },
+    );
+
+  const reject = (row) =>
+    commit(
+      (current) => ({
+        ...current,
+        hostelApplications: current.hostelApplications.map((item) =>
+          item.id === row.id ? { ...item, status: "Rejected", updatedAt: new Date().toISOString() } : item,
+        ),
+      }),
+      {
+        module: "hostel",
+        title: `${row.fullName || "Hostel"} application rejected`,
+        studentId: row.studentId,
+        refId: row.id,
+        notify: true,
+      },
+    );
+
   return (
     <RecordWorkspace
       title="Applications"
@@ -73,6 +109,27 @@ export default function Applications() {
       prefix="HST"
       onSave={save}
       onDelete={remove}
+      additionalRowActions={(row) => (
+        <Space>
+          {row.status !== "Approved" && (
+            <Button type="link" onClick={() => approve(row)}>
+              Approve
+            </Button>
+          )}
+          {row.status !== "Rejected" && (
+            <Popconfirm
+              title="Reject this application?"
+              okText="Reject"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => reject(row)}
+            >
+              <Button type="link" danger>
+                Reject
+              </Button>
+            </Popconfirm>
+          )}
+        </Space>
+      )}
     />
   );
 }

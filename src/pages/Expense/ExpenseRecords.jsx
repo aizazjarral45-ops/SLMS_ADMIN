@@ -5,6 +5,7 @@ import {
   saveRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
+import { Button, Space, Popconfirm } from "antd";
 import "./ExpenseRecords.css";
 
 export default function ExpenseRecords() {
@@ -46,6 +47,40 @@ export default function ExpenseRecords() {
         notify: true,
       },
     );
+  const approve = (row) =>
+    commit(
+      (current) => ({
+        ...current,
+        expenses: current.expenses.map((item) =>
+          item.id === row.id ? { ...item, status: "Approved", updatedAt: new Date().toISOString() } : item,
+        ),
+      }),
+      {
+        module: "expense",
+        title: `${row.title || "Expense"} approved`,
+        studentId: row.studentId,
+        refId: row.id,
+        notify: true,
+      },
+    );
+
+  const reject = (row) =>
+    commit(
+      (current) => ({
+        ...current,
+        expenses: current.expenses.map((item) =>
+          item.id === row.id ? { ...item, status: "Rejected", updatedAt: new Date().toISOString() } : item,
+        ),
+      }),
+      {
+        module: "expense",
+        title: `${row.title || "Expense"} rejected`,
+        studentId: row.studentId,
+        refId: row.id,
+        notify: true,
+      },
+    );
+
   return (
     <RecordWorkspace
       title="Expense Records"
@@ -66,6 +101,27 @@ export default function ExpenseRecords() {
           },
         )
       }
+      additionalRowActions={(row) => (
+        <Space>
+          {row.status !== "Approved" && (
+            <Button type="link" onClick={() => approve(row)}>
+              Approve
+            </Button>
+          )}
+          {row.status !== "Rejected" && (
+            <Popconfirm
+              title="Reject this expense?"
+              okText="Reject"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => reject(row)}
+            >
+              <Button type="link" danger>
+                Reject
+              </Button>
+            </Popconfirm>
+          )}
+        </Space>
+      )}
     />
   );
 }
