@@ -29,8 +29,9 @@ export default function Settings() {
 
   useEffect(() => {
     const nextPanel = normalizePanel(location.state?.panel || routePanel || "overview");
-    setPanel(nextPanel);
-  }, [location.state?.panel, routePanel]);
+    // Avoid synchronous setState during render cycles: defer update only when needed
+    if (nextPanel !== panel) setTimeout(() => setPanel(nextPanel), 0);
+  }, [location.state?.panel, routePanel, panel]);
 
   const handlePanelChange = (nextPanel) => {
     const normalized = normalizePanel(nextPanel);

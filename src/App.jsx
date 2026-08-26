@@ -245,12 +245,7 @@ function AdminShell() {
       <div className="app-shell loading-shell">
         <div className="loading-center">
           <div style={{ textAlign: "center" }}>
-            <img
-              src="/Sitelogo.png"
-              alt="SLMS"
-              style={{ width: 96, height: 96, marginBottom: 16 }}
-            />
-            <h2 style={{ margin: 0, color: "#1e3a8a" }}>SLMS Admin</h2>
+            <h1 style={{ margin: 0, color: "#1e3a8a" }}>SLMS Admin</h1>
             <p style={{ color: "#6b7280" }}>Preparing admin workspace…</p>
             <div style={{ marginTop: 16 }}>
               <Spin size="large" />
