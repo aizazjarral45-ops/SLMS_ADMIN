@@ -274,7 +274,7 @@ function AdminShell() {
             collapsible
             collapsed={collapsed}
             onCollapse={setCollapsed}
-            width={245}
+            width={100}
             theme="dark"
             className="app-sidebar app-desktop-sidebar"
           >
@@ -290,7 +290,7 @@ function AdminShell() {
         rootClassName="mobile-sidebar-drawer-root"
         title="Navigation"
         placement="left"
-        width={270}
+        width={100}
         closable
         closeIcon={<CloseOutlined />}
         open={isMobile && mobileOpen}
