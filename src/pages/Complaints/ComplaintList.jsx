@@ -7,7 +7,7 @@ import {
 import "./ComplaintList.css";
 import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 export default function ComplaintList({ onSelect }) {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     { name: "title", label: "Complaint title", required: true },
     {
@@ -64,7 +64,7 @@ export default function ComplaintList({ onSelect }) {
   return (
     <RecordWorkspace
       title="Complaint List"
-      rows={data.complaints || []}
+      rows={filterByStudent(data.complaints)}
       fields={fields}
       prefix="CMP"
       onSave={save}

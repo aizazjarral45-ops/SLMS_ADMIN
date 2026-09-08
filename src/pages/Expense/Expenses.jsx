@@ -8,7 +8,7 @@ import {
 import "./Expenses.css";
 
 export default function Expenses() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     { name: "title", label: "Expense title", required: true },
     {
@@ -70,7 +70,7 @@ export default function Expenses() {
   return (
     <RecordWorkspace
       title="Expenses"
-      rows={data.expenses || []}
+      rows={filterByStudent(data.expenses)}
       fields={fields}
       prefix="EXP"
       onSave={save}

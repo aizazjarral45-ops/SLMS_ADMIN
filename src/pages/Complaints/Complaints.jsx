@@ -8,13 +8,15 @@ import ComplaintDetails from "./ComplaintDetails";
 import ComplaintStatus from "./ComplaintStatus";
 import ComplaintResolution from "./ComplaintResolution";
 import "../../components/Admin/AdminShared.css";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Complaints.css";
 const panels = ["overview", "list", "details", "status", "resolution"];
 const normalize = (value) => (panels.includes(value) ? value : "overview");
 export default function Complaints() {
   const location = useLocation();
   const { panel: routePanel } = useParams();
-  const { data } = useAdminWorkspace();
+  const { data, filterByStudent } = useAdminWorkspace();
+  const complaints = filterByStudent(data.complaints);
   const [panel, setPanel] = useState(() =>
     normalize(location.state?.panel || routePanel || "overview"),
   );
@@ -36,7 +38,7 @@ export default function Complaints() {
     setPanel("details");
   };
   const openList = () => setPanel("list");
-  const pending = (data.complaints || []).filter(
+  const pending = complaints.filter(
     (row) => !["Resolved", "Closed"].includes(row.status),
   ).length;
   return (
@@ -59,6 +61,7 @@ export default function Complaints() {
             >
               Review statuses
             </Button>
+            <StudentSelector />
           </Space>
         </div>
         <div className="module-hero-panel">
@@ -104,7 +107,7 @@ export default function Complaints() {
                 <Statistic
                   title="Resolved"
                   value={
-                    (data.complaints || []).filter(
+                    complaints.filter(
                       (r) => r.status === "Resolved",
                     ).length
                   }
@@ -118,7 +121,7 @@ export default function Complaints() {
                 </div>
                 <Statistic
                   title="Total cases"
-                  value={(data.complaints || []).length}
+                  value={complaints.length}
                 />
               </Card>
             </Col>

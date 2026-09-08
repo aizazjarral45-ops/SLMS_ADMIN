@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ConfigProvider,
   Drawer,
@@ -28,6 +28,7 @@ import {
   SHARED_DATA_STORAGE_KEY,
   loadSharedData,
   persistSharedData,
+  createDefaultSharedData,
 } from "./data/sharedData";
 import Header from "./assets/Pages/Header/header";
 import Sidebar from "./assets/Pages/sidebar/sidebar";
@@ -45,7 +46,7 @@ import Users from "./pages/Users/Users";
 import Settings from "./pages/Settings/Settings";
 import Profile from "./pages/Profile/Profile";
 import NotFound from "./pages/NotFound";
-import { adminRequest } from "./api/client";
+import { adminRequest, isAdminApiConfigured } from "./api/client";
 import SessionExpiryHandler from "./components/SessionExpiryHandler";
 
 const { Title, Paragraph } = Typography;
@@ -107,12 +108,24 @@ function AdminShell() {
     () => window.innerWidth < MOBILE_BREAKPOINT,
   );
   const [data, setData] = useState(null);
+  const [selectedStudentId, setSelectedStudentId] = useState(
+    () => window.sessionStorage.getItem("slms-selected-student-id") || "",
+  );
+  const [selectedStudentName, setSelectedStudentName] = useState(
+    () => window.sessionStorage.getItem("slms-selected-student-name") || "",
+  );
   const [initialLoading, setInitialLoading] = useState(true);
+  const [workspaceLoading, setWorkspaceLoading] = useState(isAdminApiConfigured);
+  const [workspaceError, setWorkspaceError] = useState("");
+  const selectionRequestRef = useRef(0);
+  const restoredSelectionRef = useRef(false);
 
   // Load shared data on mount (kept synchronous but wrapped to allow a loading UI)
   useEffect(() => {
     try {
-      const loaded = loadSharedData();
+      const loaded = isAdminApiConfigured
+        ? createDefaultSharedData()
+        : loadSharedData();
       // Defer setState to avoid synchronous state updates within the effect
       setTimeout(() => setData(loaded), 0);
     } catch (e) {
@@ -136,7 +149,7 @@ function AdminShell() {
       const nextRaw =
         typeof nextValue === "function" ? nextValue(current) : nextValue;
       // Persist the candidate next state to normalize it first
-      let next = persistSharedData(nextRaw);
+      let next = isAdminApiConfigured ? nextRaw : persistSharedData(nextRaw);
 
       // Helper to create a notification entry
       const makeId = () => `N-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
@@ -206,6 +219,7 @@ function AdminShell() {
     if (!isAuthenticated) return;
     let cancelled = false;
     Promise.allSettled([
+      adminRequest("/admin/workspace"),
       adminRequest("/complaints"),
       adminRequest("/expenses"),
       adminRequest("/users/me/preferences"),
@@ -215,6 +229,7 @@ function AdminShell() {
     ]).then((results) => {
       if (cancelled) return;
       const [
+        workspace,
         complaints,
         expenses,
         preferences,
@@ -224,8 +239,11 @@ function AdminShell() {
       ] = results;
       const preferenceData =
         preferences.status === "fulfilled" ? preferences.value.preferences : null;
+      const workspaceData =
+        workspace.status === "fulfilled" ? workspace.value : null;
       updateData((current) => ({
         ...current,
+        ...(workspaceData || {}),
         complaints:
           complaints.status === "fulfilled"
             ? complaints.value.complaints || current.complaints
@@ -261,11 +279,72 @@ function AdminShell() {
               : current.academic?.assignments || [],
         },
       }));
+    }).finally(() => {
+      if (!cancelled) setWorkspaceLoading(false);
     });
     return () => {
       cancelled = true;
     };
   }, [isAuthenticated, updateData]);
+
+  const selectStudent = useCallback(async (studentId, studentName = "") => {
+    const requestId = selectionRequestRef.current + 1;
+    selectionRequestRef.current = requestId;
+    const nextId = String(studentId || "");
+    const nextName = nextId ? String(studentName || "Student") : "All Students";
+    setSelectedStudentId(nextId);
+    setSelectedStudentName(nextName);
+    window.sessionStorage.setItem("slms-selected-student-id", nextId);
+    window.sessionStorage.setItem("slms-selected-student-name", nextName);
+    setWorkspaceError("");
+    setWorkspaceLoading(true);
+    if (requestId !== selectionRequestRef.current) return;
+    setData((current) => ({
+      ...createDefaultSharedData(),
+      admin: { ...(current?.admin || {}), students: current?.admin?.students || [] },
+    }));
+    try {
+      const result = nextId
+        ? await adminRequest(`/admin/students/${encodeURIComponent(nextId)}`)
+        : await adminRequest("/admin/workspace");
+      const scoped = nextId ? result.workspace : result;
+      if (nextId && result.student?.name) {
+        setSelectedStudentName(result.student.name);
+        window.sessionStorage.setItem("slms-selected-student-name", result.student.name);
+      }
+      setData((current) => ({
+        ...current,
+        ...scoped,
+        admin: {
+          ...(scoped.admin || {}),
+          students: current?.admin?.students || scoped.admin?.students || [],
+        },
+      }));
+    } catch (error) {
+      if (requestId === selectionRequestRef.current) {
+        setWorkspaceError(error.message || "Unable to load student data.");
+      }
+    } finally {
+      if (requestId === selectionRequestRef.current) setWorkspaceLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      workspaceLoading ||
+      !selectedStudentId ||
+      restoredSelectionRef.current
+    ) return;
+    restoredSelectionRef.current = true;
+    selectStudent(selectedStudentId, selectedStudentName);
+  }, [
+    isAuthenticated,
+    workspaceLoading,
+    selectedStudentId,
+    selectedStudentName,
+    selectStudent,
+  ]);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -310,14 +389,16 @@ function AdminShell() {
     return notifications.filter((n) => !readIds.includes(n.id)).length;
   }, [data]);
 
-  if (initialLoading || !data || globalLoading) {
+  if (initialLoading || workspaceLoading || !data || globalLoading) {
 
     return (
       <div className="app-shell loading-shell">
         <div className="loading-center">
           <div style={{ textAlign: "center" }}>
             <h1 style={{ margin: 0, color: "#1e3a8a" }}>SLMS Admin</h1>
-            <p style={{ color: "#6b7280" }}>Preparing admin workspace…</p>
+            <p style={{ color: "#6b7280" }}>
+              {workspaceLoading && data ? "Loading Student Data..." : "Preparing admin workspace…"}
+            </p>
             <div style={{ marginTop: 16 }}>
               <Spin size="large" />
             </div>
@@ -350,7 +431,16 @@ function AdminShell() {
           </Sider>
         ) : null}
         <Content className="app-content">
-          <Outlet context={{ data, updateData }} />
+          <Outlet context={{
+            data,
+            updateData,
+            selectedStudentId,
+            selectedStudentName,
+            setSelectedStudentId,
+            selectStudent,
+            workspaceError,
+            studentSelectionLoading: workspaceLoading,
+          }} />
         </Content>
       </Layout>
       <Drawer

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeftOutlined,
@@ -9,11 +9,11 @@ import {
   WarningOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Col, Descriptions, Empty, Row, Table, Tag } from "antd";
-import { useAdminWorkspace, tagColor } from "../../lib/adminWorkspace";
+import { belongsToStudent, idOf, useAdminWorkspace, tagColor } from "../../lib/adminWorkspace";
 import "../../components/Admin/AdminShared.css";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./StudentDetails.css";
 
-const idOf = (row) => String(row.id || row.key || row.applicationNo || "");
 function RelatedTable({
   title,
   icon,
@@ -55,12 +55,15 @@ function RelatedTable({
 export default function StudentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data } = useAdminWorkspace();
+  const { data, selectStudent } = useAdminWorkspace();
   const student = (data.admin?.students || []).find(
-    (row) => String(row.id) === String(id),
+    (row) => idOf(row) === String(id),
   );
+  useEffect(() => {
+    if (student) selectStudent?.(idOf(student));
+  }, [selectStudent, student]);
   const related = useMemo(() => {
-    const match = (row) => String(row.studentId || row.id) === String(id);
+    const match = (row) => belongsToStudent(row, id);
     return {
       courses: (data.academic?.courses || []).filter(match),
       assignments: (data.academic?.assignments || []).filter(match),
@@ -106,6 +109,11 @@ export default function StudentDetails() {
           >
             Back to students
           </Button>
+          <StudentSelector
+            onSelect={(nextStudent) => {
+              if (nextStudent?.id) navigate(`/students/${nextStudent.id}`);
+            }}
+          />
         </div>
         <div className="module-hero-panel">
           <div className="module-hero-icon">

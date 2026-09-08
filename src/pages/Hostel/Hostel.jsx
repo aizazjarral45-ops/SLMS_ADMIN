@@ -13,6 +13,7 @@ import RoomsBeds from "./RoomsBeds";
 import Allocations from "./Allocations";
 import Fees from "./Fees";
 import "../../components/Admin/AdminShared.css";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Hostel.css";
 
 const panels = ["overview", "applications", "rooms", "allocations", "fees"];
@@ -38,6 +39,7 @@ function Hero({ panel, setPanel }) {
           >
             View overview
           </Button>
+          <StudentSelector />
         </Space>
       </div>
       <div className="module-hero-panel">
@@ -57,11 +59,11 @@ function Hero({ panel, setPanel }) {
   );
 }
 
-function Overview({ data, setPanel }) {
+function Overview({ data, setPanel, filterByStudent }) {
   const rooms = data.admin?.rooms || [];
   const allocations = data.admin?.allocations || [];
-  const applications = data.hostelApplications || [];
-  const fees = data.hostelFees || [];
+  const applications = filterByStudent(data.hostelApplications);
+  const fees = filterByStudent(data.hostelFees);
   const cards = [
     ["Applications", applications.length, <FileTextOutlined />, "applications"],
     [
@@ -128,7 +130,7 @@ function Overview({ data, setPanel }) {
 
 export default function Hostel() {
   const location = useLocation();
-  const { data } = useAdminWorkspace();
+  const { data, filterByStudent } = useAdminWorkspace();
   const { panel: routePanel } = useParams();
   const requested =
     location.state?.panel?.split?.("/")?.[0] ||
@@ -146,13 +148,13 @@ export default function Hostel() {
   const content = useMemo(
     () =>
       ({
-        overview: <Overview data={data} setPanel={setPanel} />,
+        overview: <Overview data={data} setPanel={setPanel} filterByStudent={filterByStudent} />,
         applications: <Applications />,
         rooms: <RoomsBeds />,
         allocations: <Allocations />,
         fees: <Fees />,
       })[panel],
-    [data, panel],
+    [data, panel, filterByStudent],
   );
   return (
     <div className="admin-page hostel-page">

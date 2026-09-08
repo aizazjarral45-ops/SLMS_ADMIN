@@ -8,6 +8,7 @@ import {
   Typography,
   message,
 } from "antd";
+import { useEffect } from "react";
 import {
   LockOutlined,
   MailOutlined,
@@ -20,6 +21,15 @@ import "./login.css";
 const { Title, Paragraph, Text } = Typography;
 
 function Login() {
+  useEffect(() => {
+    document.body.classList.add("admin-login-active");
+    document.documentElement.classList.add("admin-login-active");
+    return () => {
+      document.body.classList.remove("admin-login-active");
+      document.documentElement.classList.remove("admin-login-active");
+    };
+  }, []);
+
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { login } = useAuth();

@@ -14,6 +14,7 @@ import Exams from "./Exams";
 import Attendance from "./Attendance";
 import ResultsCgpa from "./ResultsCgpa";
 import "../../components/Admin/AdminShared.css";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Academic.css";
 
 const panels = [
@@ -46,6 +47,7 @@ function Hero({ panel, setPanel }) {
           >
             View overview
           </Button>
+          <StudentSelector />
         </Space>
       </div>
       <div className="module-hero-panel">
@@ -67,9 +69,12 @@ function Hero({ panel, setPanel }) {
   );
 }
 
-function Overview({ data, setPanel }) {
+function Overview({ data, setPanel, filterByStudent }) {
   const academic = data.academic || {};
-  const attendance = academic.attendance || [];
+  const attendance = filterByStudent(academic.attendance);
+  const assignments = filterByStudent(academic.assignments);
+  const profile =
+    filterByStudent(academic.profiles).find(Boolean) || academic.profile || {};
   const total = attendance.reduce(
     (sum, row) => sum + Number(row.total || 0),
     0,
@@ -79,11 +84,10 @@ function Overview({ data, setPanel }) {
     0,
   );
   const rate = total ? Math.round((attended / total) * 100) : 0;
-  const completion = academic.assignments?.length
+  const completion = assignments.length
     ? Math.round(
-        (academic.assignments.filter((row) => row.status === "Completed")
-          .length /
-          academic.assignments.length) *
+        (assignments.filter((row) => row.status === "Completed").length /
+          assignments.length) *
           100,
       )
     : 0;
@@ -91,14 +95,14 @@ function Overview({ data, setPanel }) {
     ["Courses", academic.courses?.length ?? 0, <BookOutlined />, "courses"],
     [
       "Assignments",
-      academic.assignments?.length ?? 0,
+      assignments.length,
       <FileTextOutlined />,
       "assignments",
     ],
     ["Exams", academic.exams?.length ?? 0, <CheckCircleOutlined />, "exams"],
     [
       "Current CGPA",
-      academic.profile?.cgpa ?? "—",
+      profile.cgpa ?? "—",
       <BarChartOutlined />,
       "results",
     ],
@@ -144,7 +148,7 @@ function Overview({ data, setPanel }) {
             <div className="academic-metric-label">Academic records</div>
             <div className="academic-metric-value">
               {(academic.courses?.length || 0) +
-                (academic.assignments?.length || 0) +
+                assignments.length +
                 (academic.exams?.length || 0) +
                 (academic.results?.length || 0)}
             </div>
@@ -153,7 +157,7 @@ function Overview({ data, setPanel }) {
                 100,
                 Math.round(
                   (((academic.courses?.length || 0) +
-                    (academic.assignments?.length || 0) +
+                    assignments.length +
                     (academic.exams?.length || 0)) /
                     20) *
                     100,
@@ -175,7 +179,7 @@ function Overview({ data, setPanel }) {
 export default function Academic() {
   const location = useLocation();
   const { panel: routePanel } = useParams();
-  const { data } = useAdminWorkspace();
+  const { data, filterByStudent } = useAdminWorkspace();
   const requested =
     location.state?.panel?.split?.("/")?.[0] ||
     location.state?.panel ||
@@ -192,14 +196,14 @@ export default function Academic() {
   const content = useMemo(
     () =>
       ({
-        overview: <Overview data={data} setPanel={setPanel} />,
+        overview: <Overview data={data} setPanel={setPanel} filterByStudent={filterByStudent} />,
         courses: <Courses />,
         assignments: <Assignments />,
         exams: <Exams />,
         attendance: <Attendance />,
         results: <ResultsCgpa />,
       })[panel],
-    [data, panel],
+    [data, panel, filterByStudent],
   );
   return (
     <div className="admin-page academic-page">

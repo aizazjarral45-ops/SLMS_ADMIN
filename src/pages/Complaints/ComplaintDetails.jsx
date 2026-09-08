@@ -6,8 +6,8 @@ import {
 } from "../../lib/adminWorkspace";
 import "./ComplaintDetails.css";
 export default function ComplaintDetails({ selectedId }) {
-  const { data } = useAdminWorkspace();
-  const row = (data.complaints || []).find(
+  const { data, filterByStudent } = useAdminWorkspace();
+  const row = filterByStudent(data.complaints).find(
     (item) => String(item.id || item.key) === String(selectedId),
   );
   if (!row)

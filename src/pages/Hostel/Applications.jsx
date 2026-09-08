@@ -16,7 +16,7 @@ const emailOf = (a) => a.studentId?.email || a.applicantDetails?.email || a.emai
 
 export default function Applications() {
   const { admin } = useAuth();
-  const { updateData } = useAdminWorkspace();
+  const { updateData, filterByStudent } = useAdminWorkspace();
   const [applications, setApplications] = useState([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
@@ -56,7 +56,7 @@ export default function Applications() {
 
   const visible = useMemo(() => {
     const search = query.trim().toLowerCase();
-    return applications.filter((application) => {
+    return filterByStudent(applications).filter((application) => {
       const matchesStatus = status === "All" || application.status === status;
       const text = [
         nameOf(application), emailOf(application),
@@ -65,7 +65,7 @@ export default function Applications() {
       ].filter(Boolean).join(" ").toLowerCase();
       return matchesStatus && (!search || text.includes(search));
     });
-  }, [applications, query, status]);
+  }, [applications, query, status, filterByStudent]);
 
   const updateStatus = async (application, nextStatus, allocation = {}) => {
     const id = applicationId(application);

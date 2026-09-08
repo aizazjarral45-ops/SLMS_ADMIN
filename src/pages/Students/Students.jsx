@@ -1,74 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
 import { TeamOutlined } from "@ant-design/icons";
 import { Button, Space, Tag } from "antd";
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
-import {
-  deleteRecord,
-  makeId,
-  saveRecord,
-  useAdminWorkspace,
-} from "../../lib/adminWorkspace";
+import { useAdminWorkspace } from "../../lib/adminWorkspace";
 import "../../components/Admin/AdminShared.css";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Students.css";
 export default function Students() {
   const navigate = useNavigate();
-  const { data, commit } = useAdminWorkspace();
-  const workspaceRef = useRef();
+  const { data } = useAdminWorkspace();
   const fields = [
     { name: "name", label: "Student name", required: true },
+    { name: "studentId", label: "Student ID" },
+    { name: "userId", label: "User ID" },
     { name: "email", label: "Email", required: true },
+    { name: "phone", label: "Phone" },
     { name: "program", label: "Program" },
-    {
-      name: "semester",
-      label: "Semester",
-      type: "select",
-      options: ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"],
-    },
-    { name: "cgpa", label: "CGPA", type: "number", min: 0 },
-    {
-      name: "status",
-      label: "Status",
-      type: "select",
-      options: ["Active", "On hold", "Graduated"],
-    },
   ];
-  
-  const save = (row) =>
-    commit(
-      (current) => ({
-        ...current,
-        admin: {
-          ...current.admin,
-          students: saveRecord(current.admin.students, {
-            ...row,
-            id: row.id || makeId("STU"),
-          }),
-        },
-      }),
-      {
-        module: "students",
-        title: `${row.name || "Student"} profile updated`,
-        studentId: row.id,
-        refId: row.id,
-        notify: true,
-      },
-    );
-  const remove = (row) =>
-    commit(
-      (current) => ({
-        ...current,
-        admin: {
-          ...current.admin,
-          students: deleteRecord(current.admin.students, row),
-        },
-      }),
-      {
-        module: "students",
-        title: `${row.name || "Student"} profile removed`,
-        refId: row.id,
-      },
-    );
   return (
     <div className="admin-page students-page">
       <section className="module-hero">
@@ -80,15 +28,13 @@ export default function Students() {
             record.
           </p>
           <Space wrap>
-            <Button type="primary" onClick={() => workspaceRef.current?.openCreate()}>
-              Add student
-            </Button>
             <Button
               className="dashboard-secondary-btn"
               onClick={() => navigate("/")}
             >
               Back to dashboard
             </Button>
+            <StudentSelector />
           </Space>
         </div>
         <div className="module-hero-panel">
@@ -106,13 +52,10 @@ export default function Students() {
         </div>
       </section>
       <RecordWorkspace
-        ref={workspaceRef}
         title="Student records"
         rows={data.admin?.students || []}
         fields={fields}
         prefix="STU"
-        onSave={save}
-        onDelete={remove}
         onView={(row) => navigate(`/students/${row.id}`)}
         renderValue={(field, value) => {
           if (field.name === "status") {

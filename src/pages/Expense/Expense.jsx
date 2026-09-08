@@ -12,6 +12,7 @@ import Categories from "./Categories";
 import Expenses from "./Expenses";
 import ExpenseRecords from "./ExpenseRecords";
 import "../../components/Admin/AdminShared.css";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Expense.css";
 
 const panels = ["overview", "budget", "categories", "expenses", "records"];
@@ -36,6 +37,7 @@ function Hero({ panel, setPanel }) {
           >
             View overview
           </Button>
+          <StudentSelector />
         </Space>
       </div>
       <div className="module-hero-panel">
@@ -54,8 +56,8 @@ function Hero({ panel, setPanel }) {
     </section>
   );
 }
-function Overview({ data, setPanel }) {
-  const expenses = data.expenses || [];
+function Overview({ data, setPanel, filterByStudent }) {
+  const expenses = filterByStudent(data.expenses);
   const total = expenses.reduce((sum, row) => sum + Number(row.amount || 0), 0);
   const cards = [
     ["Expense records", expenses.length, <WalletOutlined />, "records"],
@@ -113,7 +115,7 @@ function Overview({ data, setPanel }) {
 export default function Expense() {
   const location = useLocation();
   const { panel: routePanel } = useParams();
-  const { data } = useAdminWorkspace();
+  const { data, filterByStudent } = useAdminWorkspace();
   const requested =
     location.state?.panel?.split?.("/")?.[0] ||
     location.state?.panel ||
@@ -137,13 +139,13 @@ export default function Expense() {
   const content = useMemo(
     () =>
       ({
-        overview: <Overview data={data} setPanel={setPanel} />,
+        overview: <Overview data={data} setPanel={setPanel} filterByStudent={filterByStudent} />,
         budget: <MonthlyBudget />,
         categories: <Categories />,
         expenses: <Expenses />,
         records: <ExpenseRecords />,
       })[panel],
-    [data, panel],
+    [data, panel, filterByStudent],
   );
   return (
     <div className="admin-page finance-page">

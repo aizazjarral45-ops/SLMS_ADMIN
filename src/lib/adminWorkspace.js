@@ -41,6 +41,26 @@ export const apiPayload = (record = {}) => {
   return payload;
 };
 
+const referenceValues = (row = {}) => [
+  row.studentId,
+  row.userId,
+  row.targetUserId,
+  row.id,
+  row._id,
+  row.student?.id,
+  row.student?._id,
+  row.applicantDetails?.studentId,
+  row.studentInformation?.studentId,
+].filter(Boolean).map(String);
+
+export const belongsToStudent = (row, studentId) => {
+  if (!studentId) return true;
+  return referenceValues(row).includes(String(studentId));
+};
+
+export const filterByStudent = (rows, studentId) =>
+  (rows || []).filter((row) => belongsToStudent(row, studentId));
+
 export const saveRecord = (rows, record) => {
   const recordId = idOf(record);
   const existing = recordId
@@ -92,11 +112,37 @@ export function useAdminWorkspace() {
   const context = useOutletContext();
   const data = context?.data || {};
   const updateData = context?.updateData;
+  const selectedStudentId = context?.selectedStudentId || "";
+  const selectedStudentName = context?.selectedStudentName || "";
+  const setSelectedStudentId = context?.setSelectedStudentId;
+  const selectStudent = context?.selectStudent;
+  const studentSelectionLoading = Boolean(context?.studentSelectionLoading);
+  const studentSelectionError = context?.workspaceError || "";
+  const selectedStudent = (data.admin?.students || []).find(
+    (student) => idOf(student) === String(selectedStudentId),
+  );
+  const scopedFilter = useCallback(
+    (rows) => filterByStudent(rows, selectedStudentId),
+    [selectedStudentId],
+  );
   const commit = useCallback(
     (mutate, activity) => {
       updateData?.((current) => withActivity(mutate(current), activity));
     },
     [updateData],
   );
-  return { data, updateData, commit, admin: data.admin || {} };
+  return {
+    data,
+    updateData,
+    commit,
+    admin: data.admin || {},
+    selectedStudentId,
+    selectedStudentName,
+    setSelectedStudentId,
+    selectStudent,
+    selectedStudent,
+    studentSelectionLoading,
+    studentSelectionError,
+    filterByStudent: scopedFilter,
+  };
 }

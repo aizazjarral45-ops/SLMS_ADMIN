@@ -7,7 +7,7 @@ import {
 } from "../../lib/adminWorkspace";
 import "./ResultsCgpa.css";
 export default function ResultsCgpa() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     {
       name: "studentId",
@@ -37,7 +37,7 @@ export default function ResultsCgpa() {
       options: ["Published", "Draft", "Reviewed"],
     },
   ];
-  const rows = data.academic?.results || [];
+  const rows = filterByStudent(data.academic?.results);
   const save = (row) =>
     commit(
       (current) => {

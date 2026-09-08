@@ -7,7 +7,7 @@ import {
 } from "../../lib/adminWorkspace";
 import "./Exams.css";
 export default function Exams() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     { name: "title", label: "Exam title", required: true },
     { name: "course", label: "Course" },
@@ -31,7 +31,7 @@ export default function Exams() {
       options: ["Scheduled", "Completed", "Deferred"],
     },
   ];
-  const rows = data.academic?.exams || [];
+  const rows = filterByStudent(data.academic?.exams);
   const save = (row) =>
     commit(
       (current) => ({

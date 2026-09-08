@@ -5,9 +5,9 @@ import { adminRequest, isAdminApiConfigured } from "../../api/client";
 import { idOf } from "../../lib/adminWorkspace";
 import "./NotificationList.css";
 export default function NotificationList() {
-  const { data, commit } = useAdminWorkspace();
+  const { data, commit, filterByStudent } = useAdminWorkspace();
   const read = data.settings?.readNotificationIds || [];
-  const notifications = data.notifications || [];
+  const notifications = filterByStudent(data.notifications);
   const mark = async (id, value) => {
     const notification = notifications.find((item) => idOf(item) === String(id));
     if (isAdminApiConfigured && notification?._id) {

@@ -2,8 +2,8 @@ import { Card, Empty, Select, Space, Tag, Typography } from "antd";
 import { idOf, useAdminWorkspace, tagColor } from "../../lib/adminWorkspace";
 import "./ComplaintStatus.css";
 export default function ComplaintStatus({ selectedId }) {
-  const { data, commit } = useAdminWorkspace();
-  const rows = data.complaints || [];
+  const { data, commit, filterByStudent } = useAdminWorkspace();
+  const rows = filterByStudent(data.complaints);
   const update = (row, status) =>
     commit(
       (current) => ({

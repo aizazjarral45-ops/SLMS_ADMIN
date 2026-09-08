@@ -79,6 +79,8 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
   const [editing, setEditing] = useState(null);
   const [query, setQuery] = useState("");
   const [messageApi, holder] = message.useMessage();
+  const canEdit = Boolean(onSave);
+  const canDelete = Boolean(onDelete);
   const visible = useMemo(() => {
     const search = query.trim().toLowerCase();
     return search
@@ -161,7 +163,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
             </Button>
           ) : null}
           {additionalRowActions ? additionalRowActions(row) : null}
-          <Button
+          {canEdit ? <Button
             type="text"
             size="small"
             aria-label={`Edit ${title}`}
@@ -170,8 +172,8 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
               setEditing(row);
               form.setFieldsValue(row);
             }}
-          />
-          <Popconfirm
+          /> : null}
+          {canDelete ? <Popconfirm
             title={deleteConfirmTitle}
             cancelText="Cancel"
             okText="Delete"
@@ -188,7 +190,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
               aria-label={`Delete ${title}`}
               icon={<DeleteOutlined />}
             />
-          </Popconfirm>
+          </Popconfirm> : null}
         </Space>
       ),
     },
@@ -204,9 +206,11 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
             placeholder={`Search ${title.toLowerCase()}`}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <Button type="primary" onClick={startCreate}>
-            {addText || `Add ${title.replace(/s$/, "")}`}
-          </Button>
+          {canEdit ? (
+            <Button type="primary" onClick={startCreate}>
+              {addText || `Add ${title.replace(/s$/, "")}`}
+            </Button>
+          ) : null}
         </Space>
       }
     >
@@ -226,7 +230,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
           ),
         }}
       />
-      <Modal
+      {canEdit ? <Modal
         destroyOnClose
         width={560}
         title={`${idOf(editing) ? "Edit" : "Add"} ${title.replace(/s$/, "")}`}
@@ -259,7 +263,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
             </Form.Item>
           ))}
         </Form>
-      </Modal>
+      </Modal> : null}
     </Card>
   );
 });

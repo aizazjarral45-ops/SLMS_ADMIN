@@ -8,7 +8,7 @@ import {
 import "./Attendance.css";
 import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 export default function Attendance() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     {
       name: "studentId",
@@ -42,7 +42,7 @@ export default function Attendance() {
       options: ["Recorded", "At risk", "Cleared"],
     },
   ];
-  const rows = data.academic?.attendance || [];
+  const rows = filterByStudent(data.academic?.attendance);
   const save = async (row) => {
     const saved = await saveAdminEntity("attendance", row);
     return commit(

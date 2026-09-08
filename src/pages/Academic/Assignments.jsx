@@ -7,7 +7,7 @@ import {
 import "./Assignments.css";
 import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 export default function Assignments() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     { name: "title", label: "Assignment title", required: true },
     { name: "course", label: "Course" },
@@ -36,7 +36,7 @@ export default function Assignments() {
       options: ["To do", "In progress", "Completed"],
     },
   ];
-  const rows = data.academic?.assignments || [];
+  const rows = filterByStudent(data.academic?.assignments);
   const save = async (row) => {
     const saved = await saveAdminEntity("assignments", row);
     return commit(

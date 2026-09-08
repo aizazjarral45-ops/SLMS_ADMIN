@@ -19,11 +19,13 @@ import {
   Progress,
   Row,
   Space,
+  Statistic,
   Tag,
   Typography,
 } from "antd";
 import { getAdminData } from "../../data/sharedData";
 import { useAdminWorkspace } from "../../lib/adminWorkspace";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Dashboard.css";
 const { Title, Paragraph, Text } = Typography;
 function MetricCard({ icon, title, value, hint, color }) {
@@ -46,11 +48,16 @@ function MetricCard({ icon, title, value, hint, color }) {
   );
 }
 export default function Dashboard() {
-  const { data } = useAdminWorkspace();
+  const { data, filterByStudent, selectedStudentId } = useAdminWorkspace();
   const navigate = useNavigate();
   const admin = getAdminData(data);
+  const selectedStudent = admin.students.find(
+    (student) => String(student.id || student._id) === String(selectedStudentId),
+  );
   const snapshot = useMemo(() => {
-    const attendance = data.academic?.attendance || [];
+    const attendance = filterByStudent(data.academic?.attendance);
+    const complaints = filterByStudent(data.complaints);
+    const expenses = filterByStudent(data.expenses);
     const total = attendance.reduce(
       (sum, row) => sum + Number(row.total || 0),
       0,
@@ -60,7 +67,7 @@ export default function Dashboard() {
       0,
     );
     return {
-      pending: (data.complaints || []).filter(
+      pending: complaints.filter(
         (row) => !["Resolved", "Closed"].includes(row.status),
       ).length,
       beds: admin.rooms.reduce(
@@ -72,12 +79,12 @@ export default function Dashboard() {
         0,
       ),
       attendance: total ? Math.round((attended / total) * 100) : 0,
-      spend: (data.expenses || []).reduce(
+      spend: expenses.reduce(
         (sum, row) => sum + Number(row.amount || 0),
         0,
       ),
     };
-  }, [admin.rooms, data]);
+  }, [admin.rooms, data, filterByStudent]);
   const activity = useMemo(() => {
     const shared = (data.activity || []).slice(0, 8).map((row) => ({
       title: row.title || "Admin activity",
@@ -154,7 +161,8 @@ export default function Dashboard() {
             next priority before it becomes a blocker.
           </Paragraph>
           <Space wrap>
-            <Button
+           <StudentSelector />
+           <Button
               type="primary"
               className="dashboard-primary-btn"
               onClick={() => navigate("/students")}
@@ -183,6 +191,36 @@ export default function Dashboard() {
           </Button>
         </div>
       </section>
+      {selectedStudentId ? (
+        <Card
+          className="dashboard-card dashboard-student-context"
+          title={`Selected student: ${selectedStudent?.name || selectedStudentId}`}
+        >
+          <Paragraph type="secondary">
+            {selectedStudent?.email || "Connected student record"}
+          </Paragraph>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={8}>
+              <Statistic
+                title="Assignments"
+                value={filterByStudent(data.academic?.assignments).length}
+              />
+            </Col>
+            <Col xs={24} sm={8}>
+              <Statistic
+                title="Attendance records"
+                value={filterByStudent(data.academic?.attendance).length}
+              />
+            </Col>
+            <Col xs={24} sm={8}>
+              <Statistic
+                title="Search history"
+                value={filterByStudent(data.aiSearchHistory).length}
+              />
+            </Col>
+          </Row>
+        </Card>
+      ) : null}
       <Row gutter={[16, 16]} className="dashboard-stats-grid">
         <Col xs={24} sm={12} xl={6}>
           <MetricCard

@@ -7,7 +7,7 @@ import {
 } from "../../lib/adminWorkspace";
 import "./Courses.css";
 export default function Courses() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     { name: "code", label: "Course code", required: true },
     { name: "title", label: "Course title", required: true },
@@ -24,7 +24,7 @@ export default function Courses() {
         })) || [],
     },
   ];
-  const rows = data.academic?.courses || [];
+  const rows = filterByStudent(data.academic?.courses);
   const save = (row) =>
     commit(
       (current) => ({

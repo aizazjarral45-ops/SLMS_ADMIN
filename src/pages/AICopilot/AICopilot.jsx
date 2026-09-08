@@ -5,9 +5,11 @@ import { Button, Space, Tag } from "antd";
 import CopilotOverview from "./CopilotOverview";
 import CopilotAnalytics from "./CopilotAnalytics";
 import CopilotSettings from "./CopilotSettings";
+import CopilotHistory from "./CopilotHistory";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "../../components/Admin/AdminShared.css";
 import "./AICopilot.css";
-const panels = ["overview", "analytics", "settings"];
+const panels = ["overview", "history", "analytics", "settings"];
 const normalize = (value) => (panels.includes(value) ? value : "overview");
 export default function AICopilot() {
   const location = useLocation();
@@ -30,6 +32,7 @@ export default function AICopilot() {
       ({
         overview: <CopilotOverview />,
         analytics: <CopilotAnalytics />,
+        history: <CopilotHistory />,
         settings: <CopilotSettings />,
       })[panel],
     [panel],
@@ -41,8 +44,7 @@ export default function AICopilot() {
           <Tag className="dashboard-eyebrow">AI COPILOT</Tag>
           <h1>AI Copilot</h1>
           <p>
-            Monitor assistant activity, create operational notes, and control
-            connected assistance features.
+            Review real student AI searches and control connected assistance features.
           </p>
           <Space wrap>
             <Button type="primary" onClick={() => setPanel("overview")}>
@@ -54,6 +56,7 @@ export default function AICopilot() {
             >
               Manage settings
             </Button>
+            <StudentSelector />
           </Space>
         </div>
         <div className="module-hero-panel">
@@ -61,14 +64,12 @@ export default function AICopilot() {
             <RobotOutlined />
           </div>
           <h3>Connected assistant</h3>
-          <span>Local notes and controls are ready for review.</span>
+          <span>Student search history is loaded from the connected database.</span>
           <Button
             type="link"
-            onClick={() =>
-              setPanel(panel === "analytics" ? "overview" : "analytics")
-            }
+            onClick={() => setPanel(panel === "history" ? "overview" : "history")}
           >
-            {panel === "analytics" ? "Open message log" : "View analytics"}
+          {panel === "history" ? "Open overview" : "Search history"}
           </Button>
         </div>
       </section>

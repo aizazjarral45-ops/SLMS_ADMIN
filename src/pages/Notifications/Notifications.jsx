@@ -5,6 +5,7 @@ import { Button, Space, Tag } from "antd";
 import NotificationList from "./NotificationList";
 import NotificationPreferences from "./NotificationPreferences";
 import "../../components/Admin/AdminShared.css";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Notifications.css";
 
 export default function Notifications() {
@@ -45,6 +46,7 @@ export default function Notifications() {
             >
               Manage preferences
             </Button>
+            <StudentSelector />
           </Space>
         </div>
         <div className="module-hero-panel">

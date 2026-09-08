@@ -3,9 +3,9 @@ import { Button, Card, Form, Input, Select, Empty } from "antd";
 import { idOf, useAdminWorkspace } from "../../lib/adminWorkspace";
 import "./ComplaintResolution.css";
 export default function ComplaintResolution({ selectedId, onSaved }) {
-  const { data, commit } = useAdminWorkspace();
+  const { data, commit, filterByStudent } = useAdminWorkspace();
   const [form] = Form.useForm();
-  const rows = data.complaints || [];
+  const rows = filterByStudent(data.complaints);
   const row = rows.find((item) => idOf(item) === String(selectedId));
   useEffect(() => {
     form.setFieldsValue(row || {});

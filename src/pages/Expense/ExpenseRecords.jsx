@@ -10,7 +10,7 @@ import "./ExpenseRecords.css";
 import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 
 export default function ExpenseRecords() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     { name: "title", label: "Record title", required: true },
     {
@@ -88,7 +88,7 @@ export default function ExpenseRecords() {
   return (
     <RecordWorkspace
       title="Expense Records"
-      rows={data.expenses || []}
+      rows={filterByStudent(data.expenses)}
       fields={fields}
       prefix="EXP"
       onSave={save}

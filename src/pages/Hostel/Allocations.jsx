@@ -8,7 +8,7 @@ import {
 import "./Allocations.css";
 
 export default function Allocations() {
-  const { data, admin, commit } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const fields = [
     {
       name: "studentId",
@@ -126,7 +126,7 @@ export default function Allocations() {
   return (
     <RecordWorkspace
       title="Allocations"
-      rows={data.admin?.allocations || []}
+      rows={filterByStudent(data.admin?.allocations)}
       fields={fields}
       prefix="ALC"
       onSave={save}

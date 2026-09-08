@@ -1,4 +1,5 @@
 .admin-login-page {
+  box-sizing: border-box;
   align-items: stretch;
   background: linear-gradient(135deg, #102a43 0%, #1e3a8a 55%, #2563eb 100%);
   display: grid;
@@ -6,6 +7,17 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
   min-height: 100vh;
   padding: clamp(28px, 7vw, 96px);
+}
+.admin-login-active,
+.admin-login-active body {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.admin-login-active #root {
+  height: auto;
+  min-height: 100vh;
 }
 .admin-login-intro {
   align-self: center;
@@ -103,6 +115,8 @@
   .admin-login-page {
     grid-template-columns: 1fr;
     padding: 40px 24px;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
   .admin-login-intro {
     max-width: none;
