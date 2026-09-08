@@ -1,11 +1,12 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
 import {
-  makeId,
+  idOf,
   saveRecord,
   deleteRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
 import "./Attendance.css";
+import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 export default function Attendance() {
   const { data, admin, commit } = useAdminWorkspace();
   const fields = [
@@ -16,8 +17,8 @@ export default function Attendance() {
       type: "select",
       options:
         admin.students?.map((student) => ({
-          value: student.id,
-          label: `${student.id} — ${student.name}`,
+          value: idOf(student),
+          label: `${idOf(student)} — ${student.name}`,
         })) || [],
     },
     { name: "course", label: "Course", required: true },
@@ -42,15 +43,15 @@ export default function Attendance() {
     },
   ];
   const rows = data.academic?.attendance || [];
-  const save = (row) =>
-    commit(
+  const save = async (row) => {
+    const saved = await saveAdminEntity("attendance", row);
+    return commit(
       (current) => ({
         ...current,
         academic: {
           ...current.academic,
           attendance: saveRecord(current.academic.attendance, {
-            ...row,
-            id: row.id || makeId("ATT"),
+            ...saved,
           }),
         },
       }),
@@ -58,10 +59,11 @@ export default function Attendance() {
         module: "academic",
         title: `${row.course} attendance recorded`,
         studentId: row.studentId,
-        refId: row.id,
+        refId: saved._id || saved.id,
         notify: true,
       },
     );
+  };
   return (
     <section className="attendance-feature">
       <RecordWorkspace
@@ -70,8 +72,9 @@ export default function Attendance() {
         fields={fields}
         prefix="ATT"
         onSave={save}
-        onDelete={(row) =>
-          commit(
+        onDelete={async (row) => {
+          await deleteAdminEntity("attendance", row);
+          return commit(
             (current) => ({
               ...current,
               academic: {
@@ -84,8 +87,8 @@ export default function Attendance() {
               title: `${row.course} attendance removed`,
               studentId: row.studentId,
             },
-          )
-        }
+          );
+        }}
       />
     </section>
   );

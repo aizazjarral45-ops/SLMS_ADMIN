@@ -258,27 +258,27 @@ export default function StudentDetails() {
               { title: "Status", dataIndex: "status" },
             ]}
           />
-          <RelatedTable
-            title="Notifications"
-            icon={<NotificationOutlined />}
-            rows={related.notifications}
-            columns={[
-              { title: "Title", dataIndex: "title" },
-              { title: "Type", dataIndex: "type" },
-            ]}
-          />
-          <RelatedTable
-            title="Recent admin activity"
-            icon={<NotificationOutlined />}
-            rows={related.activity}
-            columns={[
-              { title: "Activity", dataIndex: "title" },
-              { title: "Module", dataIndex: "module" },
-              { title: "Date", dataIndex: "createdAt" },
-            ]}
-          />
         </Col>
       </Row>
+      <RelatedTable
+        title="Notifications"
+        icon={<NotificationOutlined />}
+        rows={related.notifications}
+        columns={[
+          { title: "Title", dataIndex: "title" },
+          { title: "Type", dataIndex: "type" },
+        ]}
+      />
+      <RelatedTable
+        title="Recent admin activity"
+        icon={<NotificationOutlined />}
+        rows={related.activity}
+        columns={[
+          { title: "Activity", dataIndex: "title" },
+          { title: "Module", dataIndex: "module" },
+          { title: "Date", dataIndex: "createdAt" },
+        ]}
+      />
     </div>
   );
 }

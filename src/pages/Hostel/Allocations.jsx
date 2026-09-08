@@ -96,13 +96,27 @@ export default function Allocations() {
     );
   const remove = (row) =>
     commit(
-      (current) => ({
-        ...current,
-        admin: {
-          ...current.admin,
-          allocations: deleteRecord(current.admin.allocations, row),
-        },
-      }),
+      (current) => {
+        const allocations = deleteRecord(current.admin.allocations, row);
+        const rooms = (current.admin.rooms || []).map((room) => {
+          if (row.status !== "Active" || row.roomId !== room.id) return room;
+          const occupied = Math.max(0, Number(room.occupied || 0) - 1);
+          return {
+            ...room,
+            occupied,
+            status:
+              room.status === "Maintenance"
+                ? "Maintenance"
+                : occupied >= Number(room.capacity || 0)
+                  ? "Full"
+                  : "Available",
+          };
+        });
+        return {
+          ...current,
+          admin: { ...current.admin, allocations, rooms },
+        };
+      },
       {
         module: "hostel",
         title: "Hostel allocation removed",

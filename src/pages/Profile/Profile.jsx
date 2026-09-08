@@ -19,7 +19,7 @@ import "./Profile.css";
 const defaultProfile = {
   id: "USR-001",
   name: "SLMS Administrator",
-  email: "admin@slms.edu.pk",
+  email: "admin@slms.com",
   role: "System Administrator",
   status: "Active",
 };

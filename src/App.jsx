@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ConfigProvider,
   Drawer,
@@ -45,6 +45,8 @@ import Users from "./pages/Users/Users";
 import Settings from "./pages/Settings/Settings";
 import Profile from "./pages/Profile/Profile";
 import NotFound from "./pages/NotFound";
+import { adminRequest } from "./api/client";
+import SessionExpiryHandler from "./components/SessionExpiryHandler";
 
 const { Title, Paragraph } = Typography;
 const MOBILE_BREAKPOINT = 768;
@@ -69,11 +71,17 @@ function ForgotPage() {
         </Paragraph>
         <Form
           layout="vertical"
-          onFinish={() => {
-            messageApi.success(
-              "Reset request recorded for this local preview.",
-            );
-            navigate("/login");
+          onFinish={async ({ email }) => {
+            try {
+              await adminRequest("/auth/password-reset/request", {
+                method: "POST",
+                body: { email },
+              });
+              messageApi.success("If the account exists, a reset code has been sent.");
+              navigate("/login");
+            } catch (error) {
+              messageApi.error(error.message || "Unable to request password reset.");
+            }
           }}
         >
           <Form.Item
@@ -117,6 +125,7 @@ function AdminShell() {
     }
   }, []);
 
+  const { isAuthenticated } = useAuth();
   const [globalLoading, setGlobalLoading] = useState(false);
 
   const updateData = useCallback((nextValue) => {
@@ -190,9 +199,73 @@ function AdminShell() {
       return next;
     });
 
-    // Hide the loading indicator shortly after update completes
     setTimeout(() => setGlobalLoading(false), 180);
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    Promise.allSettled([
+      adminRequest("/complaints"),
+      adminRequest("/expenses"),
+      adminRequest("/users/me/preferences"),
+      adminRequest("/hostel"),
+      adminRequest("/notifications"),
+      adminRequest("/assignments"),
+    ]).then((results) => {
+      if (cancelled) return;
+      const [
+        complaints,
+        expenses,
+        preferences,
+        hostel,
+        notifications,
+        assignments,
+      ] = results;
+      const preferenceData =
+        preferences.status === "fulfilled" ? preferences.value.preferences : null;
+      updateData((current) => ({
+        ...current,
+        complaints:
+          complaints.status === "fulfilled"
+            ? complaints.value.complaints || current.complaints
+            : current.complaints,
+        expenses:
+          expenses.status === "fulfilled"
+            ? expenses.value.expenses || current.expenses
+            : current.expenses,
+        monthlyBudget:
+          Number.isFinite(Number(preferenceData?.monthlyBudget))
+            ? Number(preferenceData.monthlyBudget)
+            : current.monthlyBudget,
+        budgetHistory: Array.isArray(preferenceData?.budgetHistory)
+          ? preferenceData.budgetHistory
+          : current.budgetHistory,
+        hostelApplications:
+          hostel.status === "fulfilled"
+            ? hostel.value.records || current.hostelApplications
+            : current.hostelApplications,
+        notifications:
+          notifications.status === "fulfilled"
+            ? notifications.value.notifications || current.notifications
+            : current.notifications,
+        academic: {
+          ...current.academic,
+          assignments:
+            assignments.status === "fulfilled"
+              ? assignments.value.assignments ||
+                assignments.value.data?.assignments ||
+                assignments.value.records ||
+                current.academic?.assignments ||
+                []
+              : current.academic?.assignments || [],
+        },
+      }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, updateData]);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -217,7 +290,6 @@ function AdminShell() {
     return () => window.removeEventListener("storage", sync);
   }, []);
 
-  
   useEffect(() => {
     if (!data) return;
     if ((data.notifications || []).length) return;
@@ -225,8 +297,7 @@ function AdminShell() {
     (data.settings?.reminders || []).forEach((r) => derived.push({ id: `init-rem-${r.id || Math.random().toString(36).slice(2,8)}`, title: r.title || 'Reminder', type: 'reminder', refId: r.id || null, createdAt: r.when || new Date().toISOString() }));
     (data.complaints || []).filter(c=> c.status !== 'Resolved').forEach((c) => derived.push({ id: `init-comp-${c.id || Math.random().toString(36).slice(2,8)}`, title: c.title || 'Complaint', type: 'complaint', refId: c.id || null, createdAt: c.createdAt || new Date().toISOString() }));
     if (derived.length) {
-      // Defer the update to avoid synchronous setState inside the effect
-      // which can trigger cascading renders in some React setups.
+
       setTimeout(() => {
         updateData((current) => ({ ...current, notifications: [...(current.notifications || []), ...derived] }));
       }, 0);
@@ -240,17 +311,12 @@ function AdminShell() {
   }, [data]);
 
   if (initialLoading || !data || globalLoading) {
-    // Global initial loading screen (keeps Dashboard design language)
+
     return (
       <div className="app-shell loading-shell">
         <div className="loading-center">
           <div style={{ textAlign: "center" }}>
-            <img
-              src="/Sitelogo.png"
-              alt="SLMS"
-              style={{ width: 96, height: 96, marginBottom: 16 }}
-            />
-            <h2 style={{ margin: 0, color: "#1e3a8a" }}>SLMS Admin</h2>
+            <h1 style={{ margin: 0, color: "#1e3a8a" }}>SLMS Admin</h1>
             <p style={{ color: "#6b7280" }}>Preparing admin workspace…</p>
             <div style={{ marginTop: 16 }}>
               <Spin size="large" />
@@ -356,6 +422,7 @@ function App() {
     >
       <AuthProvider>
         <BrowserRouter>
+          <SessionExpiryHandler />
           <AppRoutes />
         </BrowserRouter>
       </AuthProvider>

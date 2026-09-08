@@ -35,14 +35,16 @@ export default function Categories() {
           typeof item === "string" ? item : item.name,
         );
         const normalized = name.trim();
-        const next = editing?.id
+        if (!normalized) return current;
+        const candidate = editing?.id
           ? values.map((item) => (item === editing.name ? normalized : item))
-          : [
-              normalized,
-              ...values.filter(
-                (item) => item.toLowerCase() !== normalized.toLowerCase(),
-              ),
-            ];
+          : [normalized, ...values];
+        const next = candidate.filter(
+          (item, index, all) =>
+            all.findIndex(
+              (value) => value.toLowerCase() === item.toLowerCase(),
+            ) === index,
+        );
         return { ...current, admin: { ...current.admin, categories: next } };
       },
       {
@@ -107,7 +109,8 @@ export default function Categories() {
                   }}
                 />
                 <Popconfirm
-                  title="Delete this category?"
+                  title="Are you sure you want to delete this category?"
+                  cancelText="Cancel"
                   onConfirm={() => {
                     remove(row);
                     messageApi.success("Category deleted.");
@@ -139,7 +142,7 @@ export default function Categories() {
           <Form.Item
             name="name"
             label="Category name"
-            rules={[{ required: true }]}
+            rules={[{ required: true, whitespace: true }]}
           >
             <Input />
           </Form.Item>

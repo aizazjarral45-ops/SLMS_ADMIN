@@ -16,6 +16,7 @@ import {
 } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { idOf, makeId, tagColor } from "../../lib/adminWorkspace";
+import { isAdminApiConfigured } from "../../api/client";
 import "./RecordWorkspace.css";
 
 import { useCallback } from "react";
@@ -72,6 +73,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
   addText,
   renderValue,
   additionalRowActions,
+  deleteConfirmTitle = "Are you sure you want to delete this record?",
 }, ref) {
   const [form] = Form.useForm();
   const [editing, setEditing] = useState(null);
@@ -107,10 +109,14 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
 
   // Display value helper (row parameter removed because it's unused)
 
-  const save = (values) => {
+  const save = async (values) => {
     const old = editing || {};
-    const id = idOf(old) || makeId(prefix);
-    onSave({ ...old, ...values, id });
+    const identity = idOf(old);
+    await onSave(
+      identity || isAdminApiConfigured
+        ? { ...old, ...values }
+        : { ...values, id: makeId(prefix) },
+    );
     messageApi.success(idOf(old) ? "Record updated." : "Record created.");
     setEditing(null);
     resetForm();
@@ -166,11 +172,12 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
             }}
           />
           <Popconfirm
-            title="Delete this record?"
+            title={deleteConfirmTitle}
+            cancelText="Cancel"
             okText="Delete"
             okButtonProps={{ danger: true }}
-            onConfirm={() => {
-              onDelete(row);
+            onConfirm={async () => {
+              await onDelete(row);
               messageApi.success("Record deleted.");
             }}
           >

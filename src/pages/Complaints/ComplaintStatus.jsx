@@ -1,5 +1,5 @@
 import { Card, Empty, Select, Space, Tag, Typography } from "antd";
-import { useAdminWorkspace, tagColor } from "../../lib/adminWorkspace";
+import { idOf, useAdminWorkspace, tagColor } from "../../lib/adminWorkspace";
 import "./ComplaintStatus.css";
 export default function ComplaintStatus({ selectedId }) {
   const { data, commit } = useAdminWorkspace();
@@ -9,7 +9,7 @@ export default function ComplaintStatus({ selectedId }) {
       (current) => ({
         ...current,
         complaints: current.complaints.map((item) =>
-          item.id === row.id
+          idOf(item) === idOf(row)
             ? { ...item, status, updatedAt: new Date().toISOString() }
             : item,
         ),
@@ -31,7 +31,7 @@ export default function ComplaintStatus({ selectedId }) {
         rows.map((row) => (
           <div
             className={`complaint-status-row ${String(selectedId) === String(row.id) ? "is-selected" : ""}`}
-            key={row.id}
+            key={idOf(row)}
           >
             <div>
               <Typography.Text strong>

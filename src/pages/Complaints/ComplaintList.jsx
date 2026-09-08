@@ -1,11 +1,11 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
 import {
   deleteRecord,
-  makeId,
   saveRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
 import "./ComplaintList.css";
+import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 export default function ComplaintList({ onSelect }) {
   const { data, admin, commit } = useAdminWorkspace();
   const fields = [
@@ -21,6 +21,7 @@ export default function ComplaintList({ onSelect }) {
     },
     { name: "category", label: "Category" },
     { name: "department", label: "Department" },
+    { name: "description", label: "Description", type: "textarea", required: true },
     {
       name: "status",
       label: "Status",
@@ -28,25 +29,27 @@ export default function ComplaintList({ onSelect }) {
       options: ["Submitted", "In Progress", "Resolved", "Closed"],
     },
   ];
-  const save = (row) =>
-    commit(
+  const save = async (row) => {
+    const saved = await saveAdminEntity("complaints", row);
+    return commit(
       (current) => ({
         ...current,
         complaints: saveRecord(current.complaints, {
-          ...row,
-          id: row.id || makeId("CMP"),
+          ...saved,
         }),
       }),
       {
         module: "complaints",
-        title: `${row.title || "Complaint"} updated`,
-        studentId: row.studentId,
-        refId: row.id,
+        title: `${saved.title || "Complaint"} updated`,
+        studentId: saved.studentId,
+        refId: saved._id || saved.id,
         notify: true,
       },
     );
-  const remove = (row) =>
-    commit(
+  };
+  const remove = async (row) => {
+    await deleteAdminEntity("complaints", row);
+    return commit(
       (current) => ({
         ...current,
         complaints: deleteRecord(current.complaints, row),
@@ -57,6 +60,7 @@ export default function ComplaintList({ onSelect }) {
         studentId: row.studentId,
       },
     );
+  };
   return (
     <RecordWorkspace
       title="Complaint List"

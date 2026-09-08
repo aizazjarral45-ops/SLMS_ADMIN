@@ -1,13 +1,22 @@
 import { Button, Card, Empty, List, Popconfirm, Tag } from "antd";
 import { BellOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAdminWorkspace, displayDate } from "../../lib/adminWorkspace";
+import { adminRequest, isAdminApiConfigured } from "../../api/client";
+import { idOf } from "../../lib/adminWorkspace";
 import "./NotificationList.css";
 export default function NotificationList() {
   const { data, commit } = useAdminWorkspace();
   const read = data.settings?.readNotificationIds || [];
   const notifications = data.notifications || [];
-  const mark = (id, value) =>
-    commit((current) => ({
+  const mark = async (id, value) => {
+    const notification = notifications.find((item) => idOf(item) === String(id));
+    if (isAdminApiConfigured && notification?._id) {
+      await adminRequest(`/notifications/${encodeURIComponent(notification._id)}/read`, {
+        method: "PATCH",
+        body: { read: value },
+      });
+    }
+    return commit((current) => ({
       ...current,
       settings: {
         ...current.settings,
@@ -18,8 +27,15 @@ export default function NotificationList() {
             ),
       },
     }));
-  const remove = (id) =>
-    commit((current) => ({
+  };
+  const remove = async (id) => {
+    const notification = notifications.find((item) => idOf(item) === String(id));
+    if (isAdminApiConfigured && notification?._id) {
+      await adminRequest(`/notifications/${encodeURIComponent(notification._id)}`, {
+        method: "DELETE",
+      });
+    }
+    return commit((current) => ({
       ...current,
       notifications: (current.notifications || []).filter(
         (item) => item.id !== id,
@@ -31,14 +47,25 @@ export default function NotificationList() {
         ).filter((item) => item !== id),
       },
     }));
+  };
   return (
     <Card
       className="admin-panel notification-list-feature"
       title="Notification center"
       extra={
         <Button
-          onClick={() =>
-            commit((current) => ({
+          onClick={async () => {
+            const remote = notifications.filter((item) => item._id);
+            if (isAdminApiConfigured) {
+              await Promise.all(
+                remote.map((item) =>
+                  adminRequest(`/notifications/${encodeURIComponent(item._id)}/read`, {
+                    method: "PATCH",
+                  }),
+                ),
+              );
+            }
+            return commit((current) => ({
               ...current,
               settings: {
                 ...current.settings,
@@ -46,8 +73,8 @@ export default function NotificationList() {
                   .map((item) => item.id)
                   .filter(Boolean),
               },
-            }))
-          }
+            }));
+          }}
         >
           Mark all read
         </Button>

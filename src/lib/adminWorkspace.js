@@ -1,7 +1,11 @@
 import { useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 
-export const idOf = (row) => String(row?.id || row?.key || "");
+// Accept both the local identifier convention and Mongo/API records. Keeping
+// this in one place prevents edits/deletes from silently creating duplicates
+// when a record came from an API response using `_id`.
+export const idOf = (row) =>
+  String(row?._id ?? row?.id ?? row?.key ?? row?.applicationNo ?? "");
 export const makeId = (prefix) =>
   `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 export const timestamp = () => new Date().toISOString();
@@ -30,17 +34,32 @@ export const tagColor = (value) => {
   return "gold";
 };
 export const money = (value) => `$${Number(value || 0).toFixed(2)}`;
+export const apiPayload = (record = {}) => {
+  const payload = { ...record };
+  delete payload.id;
+  delete payload.key;
+  return payload;
+};
 
 export const saveRecord = (rows, record) => {
-  const existing = (rows || []).find((item) => idOf(item) === idOf(record));
+  const recordId = idOf(record);
+  const existing = recordId
+    ? (rows || []).find((item) => idOf(item) === recordId)
+    : undefined;
   const next = {
     ...existing,
     ...record,
     createdAt: existing?.createdAt || timestamp(),
     updatedAt: timestamp(),
   };
+  // API records are Mongo documents. Do not create a second client id when
+  // an edit payload already has the authoritative _id.
+  if (next._id !== undefined && next._id !== null) {
+    delete next.id;
+    delete next.key;
+  }
   return existing
-    ? rows.map((item) => (idOf(item) === idOf(next) ? next : item))
+    ? (rows || []).map((item) => (idOf(item) === idOf(next) ? next : item))
     : [next, ...(rows || [])];
 };
 export const deleteRecord = (rows, record) =>

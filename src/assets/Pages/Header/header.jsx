@@ -52,9 +52,14 @@ function Header({ unreadCount = 0, onToggleSidebar, updateData }) {
     .slice(0, 2)
     .join("");
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login", { replace: true });
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      navigate("/login", { replace: true });
+    }
   };
 
   return (

@@ -75,6 +75,7 @@ export default function Expenses() {
       prefix="EXP"
       onSave={save}
       onDelete={remove}
+      deleteConfirmTitle="Are you sure you want to delete this expense?"
     />
   );
 }

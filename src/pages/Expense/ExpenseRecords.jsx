@@ -1,12 +1,13 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
 import {
   deleteRecord,
-  makeId,
   saveRecord,
+  idOf,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
 import { Button, Space, Popconfirm } from "antd";
 import "./ExpenseRecords.css";
+import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 
 export default function ExpenseRecords() {
   const { data, admin, commit } = useAdminWorkspace();
@@ -30,29 +31,29 @@ export default function ExpenseRecords() {
       options: ["Logged", "Approved", "Rejected"],
     },
   ];
-  const save = (row) =>
-    commit(
+  const save = async (row) => {
+    const saved = await saveAdminEntity("expenses", row);
+    return commit(
       (current) => ({
         ...current,
-        expenses: saveRecord(current.expenses, {
-          ...row,
-          id: row.id || makeId("EXP"),
-        }),
+        expenses: saveRecord(current.expenses, saved),
       }),
       {
         module: "expense",
-        title: `${row.title || "Expense"} record updated`,
-        studentId: row.studentId,
-        refId: row.id,
+        title: `${saved.title || "Expense"} record updated`,
+        studentId: saved.studentId,
+        refId: idOf(saved),
         notify: true,
       },
     );
-  const approve = (row) =>
-    commit(
+  };
+  const approve = async (row) => {
+    const updated = await saveAdminEntity("expenses", { ...row, status: "Approved" });
+    return commit(
       (current) => ({
         ...current,
         expenses: current.expenses.map((item) =>
-          item.id === row.id ? { ...item, status: "Approved", updatedAt: new Date().toISOString() } : item,
+          idOf(item) === idOf(updated) ? updated : item,
         ),
       }),
       {
@@ -63,13 +64,15 @@ export default function ExpenseRecords() {
         notify: true,
       },
     );
+  };
 
-  const reject = (row) =>
-    commit(
+  const reject = async (row) => {
+    const updated = await saveAdminEntity("expenses", { ...row, status: "Rejected" });
+    return commit(
       (current) => ({
         ...current,
         expenses: current.expenses.map((item) =>
-          item.id === row.id ? { ...item, status: "Rejected", updatedAt: new Date().toISOString() } : item,
+          idOf(item) === idOf(updated) ? updated : item,
         ),
       }),
       {
@@ -80,6 +83,7 @@ export default function ExpenseRecords() {
         notify: true,
       },
     );
+  };
 
   return (
     <RecordWorkspace
@@ -88,8 +92,10 @@ export default function ExpenseRecords() {
       fields={fields}
       prefix="EXP"
       onSave={save}
-      onDelete={(row) =>
-        commit(
+      deleteConfirmTitle="Are you sure you want to delete this expense?"
+      onDelete={async (row) => {
+        await deleteAdminEntity("expenses", row);
+        return commit(
           (current) => ({
             ...current,
             expenses: deleteRecord(current.expenses, row),
@@ -99,8 +105,8 @@ export default function ExpenseRecords() {
             title: "Expense record removed",
             studentId: row.studentId,
           },
-        )
-      }
+        );
+      }}
       additionalRowActions={(row) => (
         <Space>
           {row.status !== "Approved" && (

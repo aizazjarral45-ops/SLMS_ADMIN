@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { Button, Card, Form, Input, Select, Empty } from "antd";
-import { useAdminWorkspace } from "../../lib/adminWorkspace";
+import { idOf, useAdminWorkspace } from "../../lib/adminWorkspace";
 import "./ComplaintResolution.css";
 export default function ComplaintResolution({ selectedId, onSaved }) {
   const { data, commit } = useAdminWorkspace();
   const [form] = Form.useForm();
   const rows = data.complaints || [];
-  const row = rows.find((item) => String(item.id) === String(selectedId));
+  const row = rows.find((item) => idOf(item) === String(selectedId));
   useEffect(() => {
     form.setFieldsValue(row || {});
   }, [form, row]);
@@ -21,7 +21,7 @@ export default function ComplaintResolution({ selectedId, onSaved }) {
       (current) => ({
         ...current,
         complaints: current.complaints.map((item) =>
-          item.id === row.id
+          idOf(item) === idOf(row)
             ? { ...item, ...values, updatedAt: new Date().toISOString() }
             : item,
         ),

@@ -1,11 +1,11 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
 import {
-  makeId,
   saveRecord,
   deleteRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
 import "./Assignments.css";
+import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 export default function Assignments() {
   const { data, admin, commit } = useAdminWorkspace();
   const fields = [
@@ -37,26 +37,27 @@ export default function Assignments() {
     },
   ];
   const rows = data.academic?.assignments || [];
-  const save = (row) =>
-    commit(
+  const save = async (row) => {
+    const saved = await saveAdminEntity("assignments", row);
+    return commit(
       (current) => ({
         ...current,
         academic: {
           ...current.academic,
           assignments: saveRecord(current.academic.assignments, {
-            ...row,
-            id: row.id || makeId("ASN"),
+            ...saved,
           }),
         },
       }),
       {
         module: "academic",
-        title: `${row.title} assignment updated`,
-        studentId: row.studentId,
-        refId: row.id,
+        title: `${saved.title} assignment updated`,
+        studentId: saved.studentId,
+        refId: saved._id || saved.id,
         notify: true,
       },
     );
+  };
   return (
     <section className="assignments-feature">
       <RecordWorkspace
@@ -65,8 +66,9 @@ export default function Assignments() {
         fields={fields}
         prefix="ASN"
         onSave={save}
-        onDelete={(row) =>
-          commit(
+        onDelete={async (row) => {
+          await deleteAdminEntity("assignments", row);
+          return commit(
             (current) => ({
               ...current,
               academic: {
@@ -79,8 +81,8 @@ export default function Assignments() {
               title: `${row.title} assignment removed`,
               studentId: row.studentId,
             },
-          )
-        }
+          );
+        }}
       />
     </section>
   );

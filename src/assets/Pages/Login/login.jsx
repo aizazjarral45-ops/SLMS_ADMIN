@@ -24,19 +24,27 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const onFinish = ({ email, password, rememberMe }) => {
+  const onFinish = async ({ email, password, rememberMe }) => {
     if (!email || !password) return;
     if (rememberMe)
       window.localStorage.setItem("slms_admin_remembered_email", email);
-    login({
-      email,
-      name:
-        email === "admin@slms.edu.pk"
-          ? "SLMS Administrator"
-          : email.split("@")[0].replace(/[._-]/g, " "),
-    });
-    message.success("Welcome to the SLMS Admin Portal.");
-    navigate("/", { replace: true });
+    try {
+      await login({
+        email,
+        password,
+        name:
+          email === "admin@slms.com"
+            ? "SLMS Administrator"
+            : email.split("@")[0].replace(/[._-]/g, " "),
+      });
+      message.success("Welcome to the SLMS Admin Portal.");
+      const redirect = new URLSearchParams(window.location.search).get("redirect");
+      const destination =
+        redirect?.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
+      navigate(destination, { replace: true });
+    } catch (error) {
+      message.error(error.message || "Unable to sign in. Please try again.");
+    }
   };
 
   return (
@@ -68,7 +76,7 @@ function Login() {
           initialValues={{
             email:
               window.localStorage.getItem("slms_admin_remembered_email") ||
-              "admin@slms.edu.pk",
+              "admin@slms.com",
             rememberMe: true,
           }}
           onFinish={onFinish}
@@ -87,7 +95,7 @@ function Login() {
             <Input
               prefix={<MailOutlined />}
               size="large"
-              placeholder="admin@slms.edu.pk"
+              placeholder="admin@slms.com"
             />
           </Form.Item>
           <Form.Item
@@ -112,7 +120,7 @@ function Login() {
           </Button>
         </Form>
         <Paragraph className="login-demo-note">
-          Use any password to open Admin pannel
+          Use your configured SLMS administrator credentials.
         </Paragraph>
       </Card>
     </main>

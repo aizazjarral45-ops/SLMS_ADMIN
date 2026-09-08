@@ -1,3 +1,14 @@
 .hostel-applications-feature {
   min-width: 0;
 }
+
+.application-secondary {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.applications-loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
