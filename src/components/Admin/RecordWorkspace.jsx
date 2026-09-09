@@ -70,17 +70,21 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
   onSave,
   onDelete,
   onView,
+  readOnly = false,
   addText,
   renderValue,
   additionalRowActions,
   deleteConfirmTitle = "Are you sure you want to delete this record?",
+  pageSize = 6,
 }, ref) {
   const [form] = Form.useForm();
   const [editing, setEditing] = useState(null);
+  const [viewing, setViewing] = useState(null);
   const [query, setQuery] = useState("");
   const [messageApi, holder] = message.useMessage();
   const canEdit = Boolean(onSave);
   const canDelete = Boolean(onDelete);
+  const canView = Boolean(onView || readOnly);
   const visible = useMemo(() => {
     const search = query.trim().toLowerCase();
     return search
@@ -154,16 +158,20 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
       title: "Actions",
       key: "actions",
       fixed: "right",
-      width: onView ? 178 : 125,
+      width: canView ? 178 : 125,
       render: (_, row) => (
         <Space size={0} wrap>
-          {onView ? (
-            <Button type="link" size="small" onClick={() => onView(row)}>
+          {canView ? (
+            <Button
+              type="link"
+              size="small"
+              onClick={() => (onView ? onView(row) : setViewing(row))}
+            >
               View
             </Button>
           ) : null}
           {additionalRowActions ? additionalRowActions(row) : null}
-          {canEdit ? <Button
+          {!readOnly && canEdit ? <Button
             type="text"
             size="small"
             aria-label={`Edit ${title}`}
@@ -173,7 +181,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
               form.setFieldsValue(row);
             }}
           /> : null}
-          {canDelete ? <Popconfirm
+          {!readOnly && canDelete ? <Popconfirm
             title={deleteConfirmTitle}
             cancelText="Cancel"
             okText="Delete"
@@ -206,7 +214,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
             placeholder={`Search ${title.toLowerCase()}`}
             onChange={(event) => setQuery(event.target.value)}
           />
-          {canEdit ? (
+          {!readOnly && canEdit ? (
             <Button type="primary" onClick={startCreate}>
               {addText || `Add ${title.replace(/s$/, "")}`}
             </Button>
@@ -220,7 +228,7 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
         columns={columns}
         dataSource={visible}
         scroll={{ x: 760 }}
-        pagination={{ pageSize: 6, hideOnSinglePage: true }}
+        pagination={{ pageSize, hideOnSinglePage: true }}
         locale={{
           emptyText: (
             <Empty
@@ -264,6 +272,24 @@ const RecordWorkspace = React.forwardRef(function RecordWorkspace({
           ))}
         </Form>
       </Modal> : null}
+      {readOnly ? (
+      <Modal
+        title={`View ${title.replace(/s$/, "")}`}
+        open={viewing !== null}
+        onCancel={() => setViewing(null)}
+        footer={null}
+        destroyOnClose
+      >
+        {viewing
+          ? fields.map((field) => (
+              <div key={field.name} className="record-workspace-view-row">
+                <strong>{field.label}</strong>
+                <span>{displayValue(field, viewing[field.name])}</span>
+              </div>
+            ))
+          : null}
+      </Modal>
+      ) : null}
     </Card>
   );
 });

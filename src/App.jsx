@@ -222,7 +222,6 @@ function AdminShell() {
       adminRequest("/admin/workspace"),
       adminRequest("/complaints"),
       adminRequest("/expenses"),
-      adminRequest("/users/me/preferences"),
       adminRequest("/hostel"),
       adminRequest("/notifications"),
       adminRequest("/assignments"),
@@ -232,13 +231,10 @@ function AdminShell() {
         workspace,
         complaints,
         expenses,
-        preferences,
         hostel,
         notifications,
         assignments,
       ] = results;
-      const preferenceData =
-        preferences.status === "fulfilled" ? preferences.value.preferences : null;
       const workspaceData =
         workspace.status === "fulfilled" ? workspace.value : null;
       updateData((current) => ({
@@ -252,17 +248,11 @@ function AdminShell() {
           expenses.status === "fulfilled"
             ? expenses.value.expenses || current.expenses
             : current.expenses,
-        monthlyBudget:
-          Number.isFinite(Number(preferenceData?.monthlyBudget))
-            ? Number(preferenceData.monthlyBudget)
-            : current.monthlyBudget,
-        budgetHistory: Array.isArray(preferenceData?.budgetHistory)
-          ? preferenceData.budgetHistory
-          : current.budgetHistory,
         hostelApplications:
-          hostel.status === "fulfilled"
+          workspaceData?.hostelApplications ||
+          (hostel.status === "fulfilled"
             ? hostel.value.records || current.hostelApplications
-            : current.hostelApplications,
+            : current.hostelApplications),
         notifications:
           notifications.status === "fulfilled"
             ? notifications.value.notifications || current.notifications

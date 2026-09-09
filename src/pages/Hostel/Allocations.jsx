@@ -1,8 +1,11 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
 import {
   deleteRecord,
+  idOf,
   makeId,
+  rollNoForRecord,
   saveRecord,
+  studentNameForRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
 import "./Allocations.css";
@@ -17,7 +20,7 @@ export default function Allocations() {
       type: "select",
       options: (admin.students || []).map((s) => ({
         value: s.id,
-        label: `${s.id} — ${s.name}`,
+        label: `${s.rollNo || "No roll number"} — ${s.name}`,
       })),
     },
     {
@@ -45,7 +48,7 @@ export default function Allocations() {
           ...row,
           id: row.id || makeId("ALC"),
           studentName:
-            current.admin.students.find((s) => s.id === row.studentId)?.name ||
+            current.admin.students.find((s) => idOf(s) === String(row.studentId))?.name ||
             row.studentName,
         };
         const previous = current.admin.allocations.find(
@@ -54,15 +57,16 @@ export default function Allocations() {
         const rooms = (current.admin.rooms || []).map((room) => {
           let occupied = Number(room.occupied || 0);
           if (
-            previous?.roomId &&
-            previous.roomId !== allocation.roomId &&
-            previous.status === "Active" &&
-            previous.roomId === room.id
+            previous?.status === "Active" &&
+            previous.roomId === room.id &&
+            (previous.roomId !== allocation.roomId || allocation.status !== "Active")
           )
             occupied = Math.max(0, occupied - 1);
           if (
-            (!previous || previous.roomId !== allocation.roomId) &&
             allocation.status === "Active" &&
+            (!previous ||
+              previous.status !== "Active" ||
+              previous.roomId !== allocation.roomId) &&
             allocation.roomId === room.id
           )
             occupied += 1;
@@ -131,6 +135,11 @@ export default function Allocations() {
       prefix="ALC"
       onSave={save}
       onDelete={remove}
+      renderValue={(field, value, row) =>
+        field.name === "studentId"
+          ? `${studentNameForRecord(admin.students, row)} · ${rollNoForRecord(admin.students, row)}`
+          : undefined
+      }
     />
   );
 }

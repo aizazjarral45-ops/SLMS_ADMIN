@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useCallback, useMemo } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FileTextOutlined,
   HomeOutlined,
@@ -130,6 +130,7 @@ function Overview({ data, setPanel, filterByStudent }) {
 
 export default function Hostel() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { data, filterByStudent } = useAdminWorkspace();
   const { panel: routePanel } = useParams();
   const requested =
@@ -137,14 +138,14 @@ export default function Hostel() {
     location.state?.panel ||
     routePanel ||
     "overview";
-  const [panel, setPanel] = useState(() => normalize(requested));
-  useEffect(() => {
-    if (location.state?.panel)
-      setTimeout(
-        () => setPanel(normalize(String(location.state.panel).split("/")[0])),
-        0,
-      );
-  }, [location.state?.panel]);
+  const panel = normalize(requested);
+  const setPanel = useCallback(
+    (nextPanel) => {
+      const next = normalize(nextPanel);
+      navigate(next === "overview" ? "/hostel" : `/hostel/${next}`);
+    },
+    [navigate],
+  );
   const content = useMemo(
     () =>
       ({
@@ -154,7 +155,7 @@ export default function Hostel() {
         allocations: <Allocations />,
         fees: <Fees />,
       })[panel],
-    [data, panel, filterByStudent],
+    [data, panel, filterByStudent, setPanel],
   );
   return (
     <div className="admin-page hostel-page">

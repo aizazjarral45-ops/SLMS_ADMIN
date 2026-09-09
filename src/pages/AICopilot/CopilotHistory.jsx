@@ -1,8 +1,14 @@
 import { useMemo, useState } from "react";
 import { Button, Card, Input, Modal, Space, Table, Tag } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import { useAdminWorkspace, displayDate, idOf } from "../../lib/adminWorkspace";
+import {
+  displayDate,
+  findStudentForRecord,
+  useAdminWorkspace,
+} from "../../lib/adminWorkspace";
 import StudentSelector from "../../components/Admin/StudentSelector";
+
+const findStudentForRow = (students, row) => findStudentForRecord(students, row);
 
 export default function CopilotHistory() {
   const { data, admin, filterByStudent } = useAdminWorkspace();
@@ -13,7 +19,7 @@ export default function CopilotHistory() {
     const value = query.trim().toLowerCase();
     return filterByStudent(data.aiSearchHistory).filter((row) => {
       if (!value) return true;
-      const student = students.find((item) => idOf(item) === String(row.userId));
+      const student = findStudentForRow(students, row);
       return [row.query, row.status, student?.name, student?.email, row.userId]
         .filter(Boolean)
         .join(" ")
@@ -42,7 +48,7 @@ export default function CopilotHistory() {
               {
                 title: "Student",
                 render: (_, row) => {
-                  const student = students.find((item) => idOf(item) === String(row.userId));
+                  const student = findStudentForRow(students, row);
                   return student?.name || row.userId || "Unknown student";
                 },
               },
@@ -70,7 +76,10 @@ export default function CopilotHistory() {
         {selected ? (
           <Space direction="vertical">
             <strong>{selected.query}</strong>
-            <span>Student/User ID: {selected.userId}</span>
+            <span>
+              Student:{" "}
+              {findStudentForRow(students, selected)?.name || "Unknown student"}
+            </span>
             <span>Date: {displayDate(selected.createdAt)}</span>
             <span>Status: {selected.status}</span>
             <span>Provider: {selected.provider || "—"}</span>

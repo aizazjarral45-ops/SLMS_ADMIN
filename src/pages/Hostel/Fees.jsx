@@ -1,73 +1,64 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
 import {
-  deleteRecord,
-  makeId,
-  saveRecord,
+  studentNameForRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
 import "./Fees.css";
 
+const studentNameOf = (fee, students) =>
+  studentNameForRecord(students, fee, fee.fullName || fee.student?.name || "—");
+
+const totalAmountOf = (fee) =>
+  fee.amount ?? fee.totalAmount ?? fee.totalFee ?? fee.feesPerSemester ?? fee.feeAmount ?? 0;
+
+const paidThisMonthOf = (fee) =>
+  fee.paidThisMonth ?? fee.feesPaidThisMonth ?? (
+    Number(fee.paidAmount ?? fee.amountPaid ?? fee.paid ?? 0) > 0
+      ? fee.paidAmount ?? fee.amountPaid ?? fee.paid
+      : 0
+  );
+
+const paidOnOf = (fee) =>
+  fee.paidOn || fee.paymentDate || fee.paidAt || fee.updatedAt || fee.createdAt || "";
+
+const dateOnly = (value) => {
+  if (!value) return "—";
+  if (typeof value === "string" && value.includes("T")) return value.split("T")[0];
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
+};
+
 export default function Fees() {
-  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
+  const { data, admin, filterByStudent } = useAdminWorkspace();
   const fields = [
     {
-      name: "studentId",
+      name: "studentName",
       label: "Student",
-      required: true,
-      type: "select",
-      options: (admin.students || []).map((s) => ({
-        value: s.id,
-        label: `${s.id} — ${s.name}`,
-      })),
+      short: "Student Name",
     },
-    { name: "term", label: "Term", required: true },
-    { name: "amount", label: "Amount", required: true, type: "number", min: 0 },
-    { name: "paidOn", label: "Paid on", type: "date" },
+    { name: "totalAmount", label: "Total Amount" },
+    { name: "paidThisMonth", label: "Paid This Month" },
+    { name: "paidOn", label: "Paid On" },
     {
       name: "status",
       label: "Status",
-      type: "select",
-      options: ["Pending", "Partial", "Paid", "Overdue"],
     },
   ];
-  const save = (row) =>
-    commit(
-      (current) => ({
-        ...current,
-        hostelFees: saveRecord(current.hostelFees, {
-          ...row,
-          id: row.id || makeId("FEE"),
-          amount: Number(row.amount || 0),
-        }),
-      }),
-      {
-        module: "hostel",
-        title: `Hostel fee ${row.status || "updated"}`,
-        studentId: row.studentId,
-        refId: row.id,
-        notify: true,
-      },
-    );
-  const remove = (row) =>
-    commit(
-      (current) => ({
-        ...current,
-        hostelFees: deleteRecord(current.hostelFees, row),
-      }),
-      {
-        module: "hostel",
-        title: "Hostel fee removed",
-        studentId: row.studentId,
-      },
-    );
+  const rows = filterByStudent(data.hostelFees).map((fee) => ({
+    ...fee,
+    studentName: studentNameOf(fee, admin.students),
+    totalAmount: totalAmountOf(fee),
+    paidThisMonth: paidThisMonthOf(fee),
+    paidOn: dateOnly(paidOnOf(fee)),
+  }));
+
   return (
     <RecordWorkspace
       title="Fees"
-      rows={filterByStudent(data.hostelFees)}
+      rows={rows}
       fields={fields}
       prefix="FEE"
-      onSave={save}
-      onDelete={remove}
+      readOnly
     />
   );
 }

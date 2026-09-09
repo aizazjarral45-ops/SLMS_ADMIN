@@ -338,6 +338,18 @@
   background: #eff6ff;
   border-color: #bfdbfe;
 }
+.copilot-admin-message > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.copilot-admin-message strong {
+  font-weight: 600;
+}
+.copilot-admin-message small {
+  color: var(--slms-muted);
+}
 
 /* aicopilot-specific */
 .aicopilot-page {

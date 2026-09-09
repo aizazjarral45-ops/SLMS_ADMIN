@@ -1,150 +1,101 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  Button, Card, Empty, Form, Input, Modal, Popconfirm, Select, Space,
-  Spin, Table, Tag, message,
+  Card, Empty, Input, Select, Space, Table,
 } from "antd";
-import { adminRequest } from "../../api/client";
-import { useAuth } from "../../context/AuthContext";
-import { useAdminWorkspace } from "../../lib/adminWorkspace";
+import {
+  belongsToStudent,
+  rollNoForRecord,
+  studentNameForRecord,
+  useAdminWorkspace,
+} from "../../lib/adminWorkspace";
 import "./Applications.css";
 
 const statuses = ["Pending", "Approved", "Rejected"];
 const applicationId = (application) => application?._id || application?.id;
-const nameOf = (a) => a.studentId?.name || a.applicantDetails?.name ||
-  a.applicantDetails?.fullName || a.fullName || "—";
-const emailOf = (a) => a.studentId?.email || a.applicantDetails?.email || a.email || "—";
+const nameOf = (application, students) => studentNameForRecord(
+  students,
+  application,
+  application?.studentId?.name || application?.applicantDetails?.name ||
+    application?.applicantDetails?.fullName || application?.fullName || "—",
+);
+const emailOf = (a) => a?.studentId?.email || a?.applicantDetails?.email || a?.email || "—";
+const studentInformationOf = (application) => ({
+  fullName: application?.studentInformation?.fullName ||
+    application?.applicantDetails?.fullName || application?.fullName || "—",
+  studentId: application?.studentInformation?.studentId ||
+    application?.applicantDetails?.studentId || application?.studentId || "—",
+  email: application?.studentInformation?.email ||
+    application?.applicantDetails?.email || application?.email || "—",
+  phone: application?.studentInformation?.phone ||
+    application?.applicantDetails?.phone || application?.phone || "—",
+  program: application?.studentInformation?.program ||
+    application?.applicantDetails?.program || application?.program || "—",
+  semester: application?.studentInformation?.semester ||
+    application?.applicantDetails?.semester || application?.semester || "—",
+  gender: application?.studentInformation?.gender ||
+    application?.applicantDetails?.gender || application?.gender || "—",
+});
+const guardianInformationOf = (application) => ({
+  guardianName: application?.guardianInformation?.guardianName ||
+    application?.applicantDetails?.guardianName || application?.guardianName || "—",
+  guardianPhone: application?.guardianInformation?.guardianPhone ||
+    application?.applicantDetails?.guardianPhone || application?.guardianPhone || "—",
+  emergencyName: application?.guardianInformation?.emergencyName ||
+    application?.applicantDetails?.emergencyName || application?.emergencyName || "—",
+  emergencyPhone: application?.guardianInformation?.emergencyPhone ||
+    application?.applicantDetails?.emergencyPhone || application?.emergencyPhone || "—",
+});
 
 export default function Applications() {
-  const { admin } = useAuth();
-  const { updateData, filterByStudent } = useAdminWorkspace();
-  const [applications, setApplications] = useState([]);
+  const {
+    data,
+    selectedStudentId,
+    admin: workspaceAdmin,
+    studentSelectionLoading,
+  } = useAdminWorkspace();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(null);
-  const [approval, setApproval] = useState(null);
-  const [form] = Form.useForm();
-  const [messageApi, holder] = message.useMessage();
-
-  const loadApplications = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await adminRequest("/hostel/admin/all");
-      const loadedValue =
-        result?.applications || result?.records || result?.data?.applications;
-      const loaded = Array.isArray(loadedValue) ? loadedValue : [];
-      const unique = loaded.filter(
-        (item, index, all) =>
-          index === all.findIndex((candidate) =>
-            applicationId(candidate) && applicationId(candidate) === applicationId(item),
-          ),
-      );
-      setApplications(unique);
-      updateData?.((current) => ({ ...current, hostelApplications: unique }));
-    } catch (error) {
-      messageApi.error(error.message || "Unable to load hostel applications.");
-    } finally {
-      setLoading(false);
-    }
-  }, [messageApi, updateData]);
-
-  useEffect(() => {
-    if (!admin?.token) return undefined;
-    const timer = setTimeout(() => loadApplications(), 0);
-    return () => clearTimeout(timer);
-  }, [admin?.token, loadApplications]);
 
   const visible = useMemo(() => {
     const search = query.trim().toLowerCase();
-    return filterByStudent(applications).filter((application) => {
+    const sourceApplications = data.hostelApplications || [];
+    const belongsToSelectedStudent = (application) => {
+      if (!selectedStudentId) return true;
+      return belongsToStudent(application, selectedStudentId);
+    };
+    return sourceApplications.filter(belongsToSelectedStudent).filter((application) => {
       const matchesStatus = status === "All" || application.status === status;
       const text = [
-        nameOf(application), emailOf(application),
+        nameOf(application, workspaceAdmin.students), emailOf(application),
         application.studentId?.profile?.studentId,
         application.applicantDetails?.studentId, application.status,
       ].filter(Boolean).join(" ").toLowerCase();
       return matchesStatus && (!search || text.includes(search));
     });
-  }, [applications, query, status, filterByStudent]);
+  }, [
+    data.hostelApplications,
+    query,
+    status,
+    selectedStudentId,
+    workspaceAdmin.students,
+  ]);
 
-  const updateStatus = async (application, nextStatus, allocation = {}) => {
-    const id = applicationId(application);
-    if (!id) {
-      messageApi.error("This application has no ID and cannot be updated.");
-      return;
-    }
-    setUpdating(id);
-    try {
-      const result = await adminRequest(`/hostel/admin/allocate/${id}`, {
-        method: "PUT", body: { status: nextStatus, ...allocation },
-      });
-      const updated = result?.application;
-      setApplications((current) => current.map((item) =>
-        applicationId(item) === id
-          ? updated || { ...item, status: nextStatus, roomAllocation: allocation }
-          : item,
-      ));
-      updateData?.((current) => ({
-        ...current,
-        hostelApplications: (current.hostelApplications || []).map((item) =>
-          applicationId(item) === id
-            ? updated || { ...item, status: nextStatus, roomAllocation: allocation }
-            : item,
-        ),
-      }));
-      messageApi.success(`Application ${nextStatus.toLowerCase()}.`);
-      setApproval(null);
-      form.resetFields();
-    } catch (error) {
-      messageApi.error(error.message || "Unable to update application status.");
-    } finally {
-      setUpdating(null);
-    }
-  };
+  const studentInformationColumns = [
+    { title: "Student Name", key: "fullName", render: (_, a) => nameOf(a, workspaceAdmin.students) },
+    { title: "Student ID", key: "studentId", render: (_, a) => rollNoForRecord(workspaceAdmin.students, a) },
+    { title: "Email", key: "email", render: (_, a) => studentInformationOf(a).email },
+    { title: "Phone", key: "phone", render: (_, a) => studentInformationOf(a).phone },
+    { title: "Department / Program", key: "program", render: (_, a) => studentInformationOf(a).program },
+    { title: "Semester", key: "semester", render: (_, a) => studentInformationOf(a).semester },
+    { title: "Gender", key: "gender", render: (_, a) => studentInformationOf(a).gender },
+  ];
 
-  const columns = [
-    {
-      title: "Student", key: "student",
-      render: (_, application) => <div><strong>{nameOf(application)}</strong>
-        <div className="application-secondary">{emailOf(application)}</div></div>,
-    },
-    {
-      title: "Student ID", key: "studentId",
-      render: (_, a) => a.studentId?.profile?.studentId ||
-        a.applicantDetails?.studentId || "—",
-    },
-    {
-      title: "Applied", dataIndex: "createdAt", key: "createdAt",
-      render: (value) => value ? new Date(value).toLocaleDateString() : "—",
-    },
-    {
-      title: "Status", dataIndex: "status", key: "status",
-      render: (value) => <Tag color={value === "Approved" ? "green" :
-        value === "Rejected" ? "red" : "gold"}>{value}</Tag>,
-    },
-    {
-      title: "Room", key: "room",
-      render: (_, a) => a.roomAllocation?.roomNumber
-        ? `${a.roomAllocation.roomNumber} · ${a.roomAllocation.block}, floor ${a.roomAllocation.floor}`
-        : "—",
-    },
-    {
-      title: "Actions", key: "actions",
-      render: (_, application) => <Space size="small">
-        {application.status !== "Approved" && application.status !== "Rejected" ? (
-          <Button type="link" loading={updating === applicationId(application)} onClick={() => {
-            form.resetFields(); setApproval(application);
-          }}>Approve</Button>
-        ) : null}
-        {application.status !== "Rejected" ? (
-          <Popconfirm title="Reject this application?" okText="Reject"
-            okButtonProps={{ danger: true }}
-            onConfirm={() => updateStatus(application, "Rejected")}>
-            <Button type="link" danger loading={updating === applicationId(application)}>Reject</Button>
-          </Popconfirm>
-        ) : null}
-      </Space>,
-    },
+  const guardianColumns = [
+    { title: "Student Name", key: "fullName", render: (_, a) => nameOf(a, workspaceAdmin.students) },
+    { title: "Guardian Name", key: "guardianName", render: (_, a) => guardianInformationOf(a).guardianName },
+    { title: "Guardian Phone", key: "guardianPhone", render: (_, a) => guardianInformationOf(a).guardianPhone },
+    { title: "Emergency Contact", key: "emergencyName", render: (_, a) => guardianInformationOf(a).emergencyName },
+    { title: "Emergency Phone", key: "emergencyPhone", render: (_, a) => guardianInformationOf(a).emergencyPhone },
   ];
 
   return <Card className="record-workspace hostel-applications-feature" title="Applications"
@@ -155,27 +106,27 @@ export default function Applications() {
         options={[{ value: "All", label: "All statuses" },
           ...statuses.map((item) => ({ value: item, label: item }))]} />
     </Space>}>
-    {holder}
-    {loading ? <div className="applications-loading"><Spin /></div> :
-      <Table rowKey={applicationId} columns={columns} dataSource={visible}
-        scroll={{ x: 900 }} pagination={{ pageSize: 8, hideOnSinglePage: true }}
-        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="No applications found" /> }} />}
-    <Modal title={`Approve ${nameOf(approval)}`} open={Boolean(approval)} destroyOnClose
-      okText="Approve application" confirmLoading={Boolean(updating)}
-      onCancel={() => { setApproval(null); form.resetFields(); }}
-      onOk={() => form.submit()}>
-      <Form form={form} layout="vertical"
-        onFinish={(values) => updateStatus(approval, "Approved", values)}>
-        {["roomNumber", "block", "floor"].map((field) => (
-          <Form.Item key={field} name={field}
-            label={field === "roomNumber" ? "Room number" :
-              field[0].toUpperCase() + field.slice(1)}
-            rules={[{ required: true, message: `Enter the ${field}.` }]}>
-            <Input />
-          </Form.Item>
-        ))}
-      </Form>
-    </Modal>
+    <Card size="small" title="Saved Hostel Applications" style={{ marginBottom: 16 }}>
+      <Table
+        rowKey={applicationId}
+        columns={studentInformationColumns}
+        dataSource={visible}
+        loading={studentSelectionLoading || !Array.isArray(data.hostelApplications)}
+        pagination={{ pageSize: 8, hideOnSinglePage: true }}
+        scroll={{ x: 1000 }}
+        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No hostel information found" /> }}
+      />
+    </Card>
+    <Card size="small" title="Parents/Guardians" style={{ marginBottom: 16 }}>
+      <Table
+        rowKey={applicationId}
+        columns={guardianColumns}
+        dataSource={visible}
+        loading={studentSelectionLoading || !Array.isArray(data.hostelApplications)}
+        pagination={{ pageSize: 8, hideOnSinglePage: true }}
+        scroll={{ x: 900 }}
+        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No guardian information found" /> }}
+      />
+    </Card>
   </Card>;
 }

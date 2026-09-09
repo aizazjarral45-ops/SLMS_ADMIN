@@ -1,11 +1,15 @@
 import { Button, Card, Empty, List, Popconfirm, Tag } from "antd";
 import { BellOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useAdminWorkspace, displayDate } from "../../lib/adminWorkspace";
+import {
+  displayDate,
+  studentNameForRecord,
+  useAdminWorkspace,
+} from "../../lib/adminWorkspace";
 import { adminRequest, isAdminApiConfigured } from "../../api/client";
 import { idOf } from "../../lib/adminWorkspace";
 import "./NotificationList.css";
 export default function NotificationList() {
-  const { data, commit, filterByStudent } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const read = data.settings?.readNotificationIds || [];
   const notifications = filterByStudent(data.notifications);
   const mark = async (id, value) => {
@@ -125,7 +129,7 @@ export default function NotificationList() {
                     )}
                   </span>
                 }
-                description={`${displayDate(row.createdAt)}${row.refId ? ` · ${row.refId}` : ""}`}
+                description={`${studentNameForRecord(admin.students, row)} · ${displayDate(row.createdAt)}${row.refId ? ` · ${row.refId}` : ""}`}
               />
             </List.Item>
           );

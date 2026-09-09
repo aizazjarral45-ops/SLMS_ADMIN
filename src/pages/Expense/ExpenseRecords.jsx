@@ -3,6 +3,7 @@ import {
   deleteRecord,
   saveRecord,
   idOf,
+  studentNameForRecord,
   useAdminWorkspace,
 } from "../../lib/adminWorkspace";
 import { Button, Space, Popconfirm } from "antd";
@@ -128,6 +129,11 @@ export default function ExpenseRecords() {
           )}
         </Space>
       )}
+      renderValue={(field, value, row) =>
+        field.name === "studentId"
+          ? studentNameForRecord(admin.students, row)
+          : undefined
+      }
     />
   );
 }

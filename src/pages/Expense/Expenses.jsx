@@ -1,25 +1,20 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
-import {
-  deleteRecord,
-  makeId,
-  saveRecord,
-  useAdminWorkspace,
-} from "../../lib/adminWorkspace";
+import { studentNameForRecord, useAdminWorkspace } from "../../lib/adminWorkspace";
 import "./Expenses.css";
 
 export default function Expenses() {
-  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
+  const { data, admin, filterByStudent } = useAdminWorkspace();
   const fields = [
-    { name: "title", label: "Expense title", required: true },
     {
       name: "studentId",
-      label: "Student",
+      label: "Student Name",
       type: "select",
-      options: (admin.students || []).map((s) => ({
-        value: s.id,
-        label: `${s.id} — ${s.name}`,
+      options: (admin.students || []).map((student) => ({
+        value: student.id || student._id,
+        label: student.name,
       })),
     },
+    { name: "title", label: "Expense title", required: true },
     {
       name: "category",
       label: "Category",
@@ -37,45 +32,21 @@ export default function Expenses() {
       options: ["Logged", "Approved", "Rejected"],
     },
   ];
-  const save = (row) =>
-    commit(
-      (current) => ({
-        ...current,
-        expenses: saveRecord(current.expenses, {
-          ...row,
-          id: row.id || makeId("EXP"),
-          amount: Number(row.amount || 0),
-        }),
-      }),
-      {
-        module: "expense",
-        title: `${row.title || "Expense"} updated`,
-        studentId: row.studentId,
-        refId: row.id,
-        notify: true,
-      },
-    );
-  const remove = (row) =>
-    commit(
-      (current) => ({
-        ...current,
-        expenses: deleteRecord(current.expenses, row),
-      }),
-      {
-        module: "expense",
-        title: `${row.title || "Expense"} removed`,
-        studentId: row.studentId,
-      },
-    );
   return (
     <RecordWorkspace
       title="Expenses"
       rows={filterByStudent(data.expenses)}
       fields={fields}
       prefix="EXP"
-      onSave={save}
-      onDelete={remove}
-      deleteConfirmTitle="Are you sure you want to delete this expense?"
+      readOnly
+      renderValue={(field, value, row) => {
+        if (field.name !== "studentId") return undefined;
+        return studentNameForRecord(
+          admin.students,
+          row,
+          "—",
+        );
+      }}
     />
   );
 }

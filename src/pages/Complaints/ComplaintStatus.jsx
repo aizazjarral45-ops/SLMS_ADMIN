@@ -1,8 +1,13 @@
 import { Card, Empty, Select, Space, Tag, Typography } from "antd";
-import { idOf, useAdminWorkspace, tagColor } from "../../lib/adminWorkspace";
+import {
+  idOf,
+  studentNameForRecord,
+  useAdminWorkspace,
+  tagColor,
+} from "../../lib/adminWorkspace";
 import "./ComplaintStatus.css";
 export default function ComplaintStatus({ selectedId }) {
-  const { data, commit, filterByStudent } = useAdminWorkspace();
+  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
   const rows = filterByStudent(data.complaints);
   const update = (row, status) =>
     commit(
@@ -38,7 +43,7 @@ export default function ComplaintStatus({ selectedId }) {
                 {row.title || "Complaint"}
               </Typography.Text>
               <div className="dashboard-stat-hint">
-                {row.studentId || "Unlinked student"}
+                {studentNameForRecord(admin.students, row)}
               </div>
             </div>
             <Space>

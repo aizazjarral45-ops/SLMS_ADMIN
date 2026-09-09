@@ -1,52 +1,52 @@
 import { useMemo } from "react";
-import { Card, Col, Empty, List, Row, Tag } from "antd";
+import { Card, Empty, Tag } from "antd";
 import { displayDate, useAdminWorkspace } from "../../lib/adminWorkspace";
 import "./CopilotOverview.css";
 
 export default function CopilotOverview() {
-  const { data, filterByStudent } = useAdminWorkspace();
+  const { data, admin, filterByStudent } = useAdminWorkspace();
   const history = useMemo(
     () => filterByStudent(data.aiSearchHistory).slice(0, 8),
     [data.aiSearchHistory, filterByStudent],
   );
+  const students = admin.students || [];
 
   return (
-    <Row gutter={[16, 16]} className="copilot-overview-feature">
-      <Col xs={24} lg={8}>
-        <Card className="admin-panel" title="Student search history">
-          <List
-            dataSource={history}
-            locale={{ emptyText: "No student search history found." }}
-            renderItem={(item) => (
-              <List.Item>
-                <List.Item.Meta
-                  title={item.query}
-                  description={displayDate(item.createdAt)}
-                />
-              </List.Item>
-            )}
-          />
-        </Card>
-      </Col>
-      <Col xs={24} lg={16}>
-        <Card className="admin-panel" title="Connected student searches">
-          <div className="copilot-admin-history">
-            {history.length ? (
-              history.map((row) => (
-                <div key={row.id} className="copilot-admin-message">
-                  <Tag color="green">{row.status}</Tag>
-                  <span>{row.query}</span>
+    <Card
+      className="admin-panel copilot-overview-feature"
+      title="Student search history"
+      extra={
+        <Tag color="blue">
+          {data.copilotMessages?.length || 0} messages
+        </Tag>
+      }
+    >
+      <div className="copilot-admin-history">
+        {history.length ? (
+          history.map((row) => {
+            const student = students.find(
+              (item) => String(item.id ?? item._id) === String(row.userId),
+            );
+            return (
+              <div key={row.id} className="copilot-admin-message">
+                <Tag color="green">{row.status}</Tag>
+                <div>
+                  <strong>{row.query}</strong>
+                  <small>
+                    {student?.name || "Unknown student"} ·{" "}
+                    {displayDate(row.createdAt)}
+                  </small>
                 </div>
-              ))
-            ) : (
-              <Empty
-                description="No student searches for the selected student"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            )}
-          </div>
-        </Card>
-      </Col>
-    </Row>
+              </div>
+            );
+          })
+        ) : (
+          <Empty
+            description="No student searches for the selected student"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        )}
+      </div>
+    </Card>
   );
 }

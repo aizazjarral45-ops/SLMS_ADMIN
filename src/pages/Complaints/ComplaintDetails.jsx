@@ -1,29 +1,29 @@
-import { Card, Descriptions, Empty, Tag } from "antd";
+import { Descriptions, Modal, Tag } from "antd";
 import {
+  idOf,
+  studentNameForRecord,
   useAdminWorkspace,
   displayDate,
   tagColor,
 } from "../../lib/adminWorkspace";
 import "./ComplaintDetails.css";
-export default function ComplaintDetails({ selectedId }) {
-  const { data, filterByStudent } = useAdminWorkspace();
+export default function ComplaintDetails({ selectedId, open, onClose }) {
+  const { data, admin, filterByStudent } = useAdminWorkspace();
   const row = filterByStudent(data.complaints).find(
-    (item) => String(item.id || item.key) === String(selectedId),
+    (item) => idOf(item) === String(selectedId),
   );
-  if (!row)
-    return (
-      <Card className="admin-panel complaint-details-feature">
-        <Empty description="Select a complaint from the list to view its details." />
-      </Card>
-    );
+  if (!row) return null;
   return (
-    <Card
-      className="admin-panel complaint-details-feature"
+    <Modal
       title={row.title || "Complaint details"}
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      destroyOnClose
     >
       <Descriptions bordered column={{ xs: 1, md: 2 }}>
         <Descriptions.Item label="Student">
-          {row.studentId || "—"}
+          {studentNameForRecord(admin.students, row)}
         </Descriptions.Item>
         <Descriptions.Item label="Category">
           {row.category || "—"}
@@ -40,10 +40,7 @@ export default function ComplaintDetails({ selectedId }) {
         <Descriptions.Item label="Description" span={2}>
           {row.description || "No description supplied."}
         </Descriptions.Item>
-        <Descriptions.Item label="Resolution" span={2}>
-          {row.resolution || "No resolution recorded."}
-        </Descriptions.Item>
       </Descriptions>
-    </Card>
+    </Modal>
   );
 }

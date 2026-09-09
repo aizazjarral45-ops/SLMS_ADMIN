@@ -12,7 +12,6 @@ import Courses from "./Courses";
 import Assignments from "./Assignments";
 import Exams from "./Exams";
 import Attendance from "./Attendance";
-import ResultsCgpa from "./ResultsCgpa";
 import "../../components/Admin/AdminShared.css";
 import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Academic.css";
@@ -23,7 +22,6 @@ const panels = [
   "assignments",
   "exams",
   "attendance",
-  "results",
 ];
 const goPanel = (value) => (panels.includes(value) ? value : "overview");
 
@@ -196,12 +194,17 @@ export default function Academic() {
   const content = useMemo(
     () =>
       ({
-        overview: <Overview data={data} setPanel={setPanel} filterByStudent={filterByStudent} />,
+        overview: (
+          <Overview
+            data={data}
+            setPanel={(value) => setPanel(goPanel(value))}
+            filterByStudent={filterByStudent}
+          />
+        ),
         courses: <Courses />,
         assignments: <Assignments />,
         exams: <Exams />,
         attendance: <Attendance />,
-        results: <ResultsCgpa />,
       })[panel],
     [data, panel, filterByStudent],
   );
@@ -215,9 +218,7 @@ export default function Academic() {
             type={panel === item ? "primary" : "default"}
             onClick={() => setPanel(item)}
           >
-            {item === "results"
-              ? "Results / CGPA"
-              : item[0].toUpperCase() + item.slice(1)}
+            {item[0].toUpperCase() + item.slice(1)}
           </Button>
         ))}
       </nav>

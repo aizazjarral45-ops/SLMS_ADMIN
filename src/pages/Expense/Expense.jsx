@@ -10,12 +10,11 @@ import { useAdminWorkspace, money } from "../../lib/adminWorkspace";
 import MonthlyBudget from "./MonthlyBudget";
 import Categories from "./Categories";
 import Expenses from "./Expenses";
-import ExpenseRecords from "./ExpenseRecords";
 import "../../components/Admin/AdminShared.css";
 import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Expense.css";
 
-const panels = ["overview", "budget", "categories", "expenses", "records"];
+const panels = ["overview", "budget", "categories", "expenses"];
 const normalize = (value) => (panels.includes(value) ? value : "overview");
 function Hero({ panel, setPanel }) {
   return (
@@ -28,9 +27,6 @@ function Hero({ panel, setPanel }) {
           expense records.
         </p>
         <Space wrap>
-          <Button type="primary" onClick={() => setPanel("expenses")}>
-            Add expense
-          </Button>
           <Button
             className="dashboard-secondary-btn"
             onClick={() => setPanel("overview")}
@@ -59,13 +55,23 @@ function Hero({ panel, setPanel }) {
 function Overview({ data, setPanel, filterByStudent }) {
   const expenses = filterByStudent(data.expenses);
   const total = expenses.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const budget = Number(data.monthlyBudget || 0);
+  const available = budget - total;
+  const categoryCount = new Set(
+    expenses.map((row) => String(row.category || "Uncategorized").trim().toLowerCase()),
+  ).size;
+  const averageExpense = expenses.length ? total / expenses.length : 0;
+  const highestExpense = expenses.reduce(
+    (highest, row) => Math.max(highest, Number(row.amount || 0)),
+    0,
+  );
   const cards = [
-    ["Expense records", expenses.length, <WalletOutlined />, "records"],
     ["Student spend", money(total), <BarChartOutlined />, "expenses"],
-    ["Monthly budget", money(data.monthlyBudget), <WalletOutlined />, "budget"],
+    ["Monthly budget", money(budget), <WalletOutlined />, "budget"],
+    ["Available Balance", money(available), <WalletOutlined />, "budget"],
     [
       "Categories",
-      (data.admin?.categories || []).length,
+      categoryCount,
       <FileTextOutlined />,
       "categories",
     ],
@@ -85,27 +91,27 @@ function Overview({ data, setPanel, filterByStudent }) {
           </Col>
         ))}
       </Row>
-      <Card className="admin-panel" title="Spending snapshot">
-        <div className="related-grid">
-          <div>
-            <strong>
-              {expenses.filter((r) => r.status === "Approved").length}
-            </strong>
-            <div className="dashboard-stat-hint">Approved records</div>
+      <Card className="admin-panel expense-snapshot" title="Spending snapshot">
+        <div className="expense-snapshot-grid">
+          <div className="expense-snapshot-item">
+            <span className="expense-snapshot-label">Expense records</span>
+            <strong>{expenses.length}</strong>
+            <div className="dashboard-stat-hint">Total records for this student</div>
           </div>
-          <div>
-            <strong>
-              {expenses.filter((r) => r.status === "Logged").length}
-            </strong>
-            <div className="dashboard-stat-hint">Awaiting review</div>
+          <div className="expense-snapshot-item">
+            <span className="expense-snapshot-label">Categories</span>
+            <strong>{categoryCount}</strong>
+            <div className="dashboard-stat-hint">Unique categories used</div>
           </div>
-          <div>
-            <strong>
-              {data.monthlyBudget
-                ? `${Math.min(100, Math.round((total / data.monthlyBudget) * 100))}%`
-                : "—"}
-            </strong>
-            <div className="dashboard-stat-hint">Budget utilization</div>
+          <div className="expense-snapshot-item">
+            <span className="expense-snapshot-label">Average expense</span>
+            <strong>{money(averageExpense)}</strong>
+            <div className="dashboard-stat-hint">Average per recorded expense</div>
+          </div>
+          <div className="expense-snapshot-item">
+            <span className="expense-snapshot-label">Largest expense</span>
+            <strong>{money(highestExpense)}</strong>
+            <div className="dashboard-stat-hint">Highest recorded amount</div>
           </div>
         </div>
       </Card>
@@ -128,9 +134,7 @@ export default function Expense() {
         () =>
           setPanel(
             normalize(
-              String(location.state.panel).split("/")[0] === "expenseRecords"
-                ? "records"
-                : String(location.state.panel).split("/")[0],
+              String(location.state.panel).split("/")[0],
             ),
           ),
         0,
@@ -143,7 +147,6 @@ export default function Expense() {
         budget: <MonthlyBudget />,
         categories: <Categories />,
         expenses: <Expenses />,
-        records: <ExpenseRecords />,
       })[panel],
     [data, panel, filterByStudent],
   );
@@ -157,9 +160,7 @@ export default function Expense() {
             type={panel === item ? "primary" : "default"}
             onClick={() => setPanel(item)}
           >
-            {item === "records"
-              ? "Expense Records"
-              : item[0].toUpperCase() + item.slice(1)}
+            {item[0].toUpperCase() + item.slice(1)}
           </Button>
         ))}
       </nav>

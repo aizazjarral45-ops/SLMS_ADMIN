@@ -41,17 +41,27 @@ export const apiPayload = (record = {}) => {
   return payload;
 };
 
-const referenceValues = (row = {}) => [
-  row.studentId,
-  row.userId,
-  row.targetUserId,
-  row.id,
-  row._id,
-  row.student?.id,
-  row.student?._id,
-  row.applicantDetails?.studentId,
-  row.studentInformation?.studentId,
-].filter(Boolean).map(String);
+export const referenceValues = (row = {}) => {
+  const source = row || {};
+  return [
+    typeof source.studentId === "object" ? null : source.studentId,
+    source.studentId?._id,
+    source.studentId?.id,
+    source.studentId?.userId,
+    source.studentId?.studentId,
+    source.studentId?.profile?.userId,
+    source.studentId?.profile?.studentId,
+    source.userId,
+    source.targetUserId,
+    source.recipientId,
+    source.student?.id,
+    source.student?._id,
+    source.student?.userId,
+    source.student?.studentId,
+    source.applicantDetails?.studentId,
+    source.studentInformation?.studentId,
+  ].filter(Boolean).map(String);
+};
 
 export const belongsToStudent = (row, studentId) => {
   if (!studentId) return true;
@@ -60,6 +70,21 @@ export const belongsToStudent = (row, studentId) => {
 
 export const filterByStudent = (rows, studentId) =>
   (rows || []).filter((row) => belongsToStudent(row, studentId));
+
+export const findStudentForRecord = (students = [], row = {}) => {
+  const references = new Set(referenceValues(row));
+  return students.find((student) =>
+    referenceValues(student).some((reference) => references.has(reference)),
+  );
+};
+
+export const studentNameForRecord = (students, row, fallback = "—") =>
+  findStudentForRecord(students, row)?.name ||
+  findStudentForRecord(students, row)?.fullName ||
+  (row?.studentName && row.studentName !== "All Students" ? row.studentName : fallback);
+
+export const rollNoForRecord = (students, row, fallback = "—") =>
+  findStudentForRecord(students, row)?.rollNo || row?.rollNo || fallback;
 
 export const saveRecord = (rows, record) => {
   const recordId = idOf(record);
@@ -144,5 +169,10 @@ export function useAdminWorkspace() {
     studentSelectionLoading,
     studentSelectionError,
     filterByStudent: scopedFilter,
+    findStudentForRecord: (row) => findStudentForRecord(data.admin?.students, row),
+    studentNameForRecord: (row, fallback) =>
+      studentNameForRecord(data.admin?.students, row, fallback),
+    rollNoForRecord: (row, fallback) =>
+      rollNoForRecord(data.admin?.students, row, fallback),
   };
 }

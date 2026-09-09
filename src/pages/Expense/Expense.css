@@ -5,3 +5,73 @@
 .expense-hero {
   width: 100%;
 }
+.expense-snapshot {
+  overflow: hidden;
+}
+.expense-snapshot-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.expense-snapshot-item {
+  background: linear-gradient(145deg, #f8fbff, #eef4ff);
+  border: 1px solid #dbe7f7;
+  border-radius: 14px;
+  min-width: 0;
+  padding: 16px;
+}
+.expense-snapshot-label {
+  color: #64748b;
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.expense-snapshot-item strong {
+  color: #1e3a8a;
+  display: block;
+  font-size: 24px;
+  line-height: 1.2;
+}
+@media (max-width: 900px) {
+  .expense-snapshot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+body:has(.finance-page) .record-workspace-view-row {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #e5edf8;
+  border-radius: 10px;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+}
+body:has(.finance-page) .record-workspace-view-row strong {
+  color: #1e3a8a;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+body:has(.finance-page) .record-workspace-view-row span {
+  color: #334155;
+  font-weight: 600;
+  text-align: right;
+}
+@media (max-width: 640px) {
+  .expense-snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+  body:has(.finance-page) .record-workspace-view-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+  body:has(.finance-page) .record-workspace-view-row span {
+    text-align: left;
+  }
+}

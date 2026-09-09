@@ -1,20 +1,17 @@
 import RecordWorkspace from "../../components/Admin/RecordWorkspace";
-import {
-  deleteRecord,
-  saveRecord,
-  useAdminWorkspace,
-} from "../../lib/adminWorkspace";
+import { studentNameForRecord, useAdminWorkspace } from "../../lib/adminWorkspace";
 import "./ComplaintList.css";
-import { saveAdminEntity, deleteAdminEntity } from "../../lib/adminApi";
 export default function ComplaintList({ onSelect }) {
-  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
+  const { data, admin, filterByStudent } =
+    useAdminWorkspace();
+  const students = admin.students || [];
   const fields = [
     { name: "title", label: "Complaint title", required: true },
     {
       name: "studentId",
       label: "Student",
       type: "select",
-      options: (admin.students || []).map((s) => ({
+      options: students.map((s) => ({
         value: s.id,
         label: `${s.id} — ${s.name}`,
       })),
@@ -29,36 +26,11 @@ export default function ComplaintList({ onSelect }) {
       options: ["Submitted", "In Progress", "Resolved", "Closed"],
     },
   ];
-  const save = async (row) => {
-    const saved = await saveAdminEntity("complaints", row);
-    return commit(
-      (current) => ({
-        ...current,
-        complaints: saveRecord(current.complaints, {
-          ...saved,
-        }),
-      }),
-      {
-        module: "complaints",
-        title: `${saved.title || "Complaint"} updated`,
-        studentId: saved.studentId,
-        refId: saved._id || saved.id,
-        notify: true,
-      },
-    );
-  };
-  const remove = async (row) => {
-    await deleteAdminEntity("complaints", row);
-    return commit(
-      (current) => ({
-        ...current,
-        complaints: deleteRecord(current.complaints, row),
-      }),
-      {
-        module: "complaints",
-        title: `${row.title || "Complaint"} removed`,
-        studentId: row.studentId,
-      },
+  const studentName = (row) => {
+    return studentNameForRecord(
+      students,
+      row,
+      "—",
     );
   };
   return (
@@ -67,9 +39,11 @@ export default function ComplaintList({ onSelect }) {
       rows={filterByStudent(data.complaints)}
       fields={fields}
       prefix="CMP"
-      onSave={save}
-      onDelete={remove}
       onView={onSelect}
+      readOnly
+      renderValue={(field, value, row) =>
+        field.name === "studentId" ? studentName(row) : undefined
+      }
     />
   );
 }

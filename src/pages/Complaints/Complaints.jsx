@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Button, Card, Col, Row, Space, Statistic, Tag } from "antd";
 import { CheckCircleOutlined, WarningOutlined } from "@ant-design/icons";
-import { useAdminWorkspace } from "../../lib/adminWorkspace";
+import { idOf, useAdminWorkspace } from "../../lib/adminWorkspace";
 import ComplaintList from "./ComplaintList";
 import ComplaintDetails from "./ComplaintDetails";
 import ComplaintStatus from "./ComplaintStatus";
-import ComplaintResolution from "./ComplaintResolution";
 import "../../components/Admin/AdminShared.css";
 import StudentSelector from "../../components/Admin/StudentSelector";
 import "./Complaints.css";
-const panels = ["overview", "list", "details", "status", "resolution"];
+const panels = ["overview", "list", "status"];
 const normalize = (value) => (panels.includes(value) ? value : "overview");
 export default function Complaints() {
   const location = useLocation();
@@ -30,12 +29,11 @@ export default function Complaints() {
     if (location.state?.id)
       setTimeout(() => {
         setSelectedId(location.state.id);
-        setPanel("details");
+        setPanel("list");
       }, 0);
   }, [location.state?.panel, location.state?.id]);
   const open = (row) => {
-    setSelectedId(row.id);
-    setPanel("details");
+    setSelectedId(idOf(row));
   };
   const openList = () => setPanel("list");
   const pending = complaints.filter(
@@ -72,8 +70,8 @@ export default function Complaints() {
           <span>
             {pending} complaint{pending === 1 ? "" : "s"} require follow-up.
           </span>
-          <Button type="link" onClick={() => setPanel("resolution")}>
-            Open resolution
+          <Button type="link" onClick={() => setPanel("status")}>
+            Status
           </Button>
         </div>
       </section>
@@ -128,8 +126,8 @@ export default function Complaints() {
           </Row>
           <Card className="admin-panel" title="Complaint workflow">
             <p>
-              Use the workspaces above to add a case, inspect its details,
-              update status, and document resolution.
+              Use the workspaces above to review complaints and update their
+              status.
             </p>
             <Button type="primary" onClick={openList}>
               Open complaint list
@@ -138,14 +136,12 @@ export default function Complaints() {
         </>
       )}
       {panel === "list" && <ComplaintList onSelect={open} />}
-      {panel === "details" && <ComplaintDetails selectedId={selectedId} />}
       {panel === "status" && <ComplaintStatus selectedId={selectedId} />}
-      {panel === "resolution" && (
-        <ComplaintResolution
-          selectedId={selectedId}
-          onSaved={() => setPanel("details")}
-        />
-      )}
+      <ComplaintDetails
+        selectedId={selectedId}
+        open={selectedId !== null}
+        onClose={() => setSelectedId(null)}
+      />
     </div>
   );
 }

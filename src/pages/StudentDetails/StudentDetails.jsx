@@ -9,7 +9,13 @@ import {
   WarningOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Col, Descriptions, Empty, Row, Table, Tag } from "antd";
-import { belongsToStudent, idOf, useAdminWorkspace, tagColor } from "../../lib/adminWorkspace";
+import {
+  belongsToStudent,
+  idOf,
+  rollNoForRecord,
+  useAdminWorkspace,
+  tagColor,
+} from "../../lib/adminWorkspace";
 import "../../components/Admin/AdminShared.css";
 import StudentSelector from "../../components/Admin/StudentSelector";
 import "./StudentDetails.css";
@@ -126,7 +132,9 @@ export default function StudentDetails() {
       </section>
       <Card className="admin-panel" title="Student information">
         <Descriptions bordered column={{ xs: 1, md: 2 }}>
-          <Descriptions.Item label="Student ID">{student.id}</Descriptions.Item>
+          <Descriptions.Item label="Student ID">
+            {rollNoForRecord([student], student)}
+          </Descriptions.Item>
           <Descriptions.Item label="Name">{student.name}</Descriptions.Item>
           <Descriptions.Item label="Email">
             {student.email || "—"}

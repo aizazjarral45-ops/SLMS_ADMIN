@@ -57,7 +57,10 @@ export default function StudentSelector({ onSelect }) {
         }}
       >
         {selectedStudentId
-          ? selectedStudentName || selected?.name || selected?.fullName || "Student"
+          ? selected?.name ||
+            selected?.fullName ||
+            selectedStudentName ||
+            "Student"
           : selectedStudentName === "All Students"
             ? "All Students"
             : "Choose Student"}
@@ -126,7 +129,7 @@ export default function StudentSelector({ onSelect }) {
                   <UserOutlined />
                   <span>
                     <strong>{student.name || student.fullName || "Unnamed student"}</strong>
-                    <small>{student.studentId || identifier} · {student.email || "No email"}</small>
+                    <small>{student.rollNo || "No roll number"} · {student.email || "No email"}</small>
                   </span>
                 </Space>
                 {isSelected ? <CheckOutlined /> : null}

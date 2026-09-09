@@ -12,6 +12,21 @@
 .record-workspace .ant-table-wrapper {
   overflow: hidden;
 }
+.record-workspace-view-row {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.record-workspace-view-row + .record-workspace-view-row {
+  border-top: 1px solid #eef2f7;
+}
+.record-workspace-view-row strong {
+  color: #475569;
+}
+.record-workspace-view-row span {
+  text-align: right;
+}
 @media (max-width: 600px) {
   .record-workspace .ant-card-head {
     align-items: flex-start;

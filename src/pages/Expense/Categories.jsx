@@ -1,89 +1,41 @@
 import { useMemo, useState } from "react";
-import {
-  Button,
-  Card,
-  Empty,
-  Form,
-  Input,
-  Modal,
-  Popconfirm,
-  Space,
-  Table,
-  Tag,
-  message,
-} from "antd";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { useAdminWorkspace } from "../../lib/adminWorkspace";
+import { Button, Card, Descriptions, Empty, Modal, Table, Tag } from "antd";
+import { useAdminWorkspace, money } from "../../lib/adminWorkspace";
 import "./Categories.css";
 
 export default function Categories() {
-  const { data, commit } = useAdminWorkspace();
-  const [form] = Form.useForm();
-  const [messageApi, holder] = message.useMessage();
-  const [editing, setEditing] = useState(null);
+  const { data, filterByStudent } = useAdminWorkspace();
+  const [viewing, setViewing] = useState(null);
   const rows = useMemo(
-    () =>
-      (data.admin?.categories || []).map((item) =>
+    () => {
+      const categories = (data.admin?.categories || []).map((item) =>
         typeof item === "string" ? { id: `CAT-${item}`, name: item } : item,
-      ),
-    [data.admin?.categories],
+      );
+      const known = new Set(categories.map((item) => item.name));
+      filterByStudent(data.expenses).forEach((expense) => {
+        const name = expense.category || "Uncategorized";
+        if (!known.has(name)) {
+          categories.push({ id: `CAT-${name}`, name });
+          known.add(name);
+        }
+      });
+      return categories;
+    },
+    [data.admin?.categories, data.expenses, filterByStudent],
   );
-  const save = ({ name }) =>
-    commit(
-      (current) => {
-        const values = (current.admin.categories || []).map((item) =>
-          typeof item === "string" ? item : item.name,
-        );
-        const normalized = name.trim();
-        if (!normalized) return current;
-        const candidate = editing?.id
-          ? values.map((item) => (item === editing.name ? normalized : item))
-          : [normalized, ...values];
-        const next = candidate.filter(
-          (item, index, all) =>
-            all.findIndex(
-              (value) => value.toLowerCase() === item.toLowerCase(),
-            ) === index,
-        );
-        return { ...current, admin: { ...current.admin, categories: next } };
-      },
-      {
-        module: "expense",
-        title: `Category ${editing?.id ? "updated" : "created"}`,
-        notify: true,
-      },
-    );
-  const remove = (row) =>
-    commit(
-      (current) => ({
-        ...current,
-        admin: {
-          ...current.admin,
-          categories: (current.admin.categories || []).filter(
-            (item) =>
-              (typeof item === "string" ? item : item.name) !== row.name,
-          ),
-        },
-      }),
-      { module: "expense", title: `${row.name} category removed` },
-    );
+  const spendingByCategory = useMemo(() => {
+    const totals = new Map();
+    filterByStudent(data.expenses).forEach((expense) => {
+      const category = expense.category || "Uncategorized";
+      totals.set(category, (totals.get(category) || 0) + Number(expense.amount || 0));
+    });
+    return totals;
+  }, [data.expenses, filterByStudent]);
   return (
     <Card
       className="admin-panel expense-categories-feature"
       title="Categories"
-      extra={
-        <Button
-          type="primary"
-          onClick={() => {
-            form.resetFields();
-            setEditing({});
-          }}
-        >
-          Add category
-        </Button>
-      }
     >
-      {holder}
       <Table
         rowKey="id"
         dataSource={rows}
@@ -96,57 +48,33 @@ export default function Categories() {
             render: (value) => <Tag color="blue">{value}</Tag>,
           },
           {
+            title: "Amount Spent",
+            key: "amountSpent",
+            render: (_, row) => `$${(spendingByCategory.get(row.name) || 0).toFixed(2)}`,
+          },
+          {
             title: "Actions",
             width: 120,
             render: (_, row) => (
-              <Space>
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => {
-                    setEditing(row);
-                    form.setFieldsValue(row);
-                  }}
-                />
-                <Popconfirm
-                  title="Are you sure you want to delete this category?"
-                  cancelText="Cancel"
-                  onConfirm={() => {
-                    remove(row);
-                    messageApi.success("Category deleted.");
-                  }}
-                >
-                  <Button danger type="text" icon={<DeleteOutlined />} />
-                </Popconfirm>
-              </Space>
+              <Button type="link" onClick={() => setViewing(row)}>View</Button>
             ),
           },
         ]}
       />
       <Modal
-        title={`${editing?.id ? "Edit" : "Add"} category`}
-        open={editing !== null}
-        onCancel={() => setEditing(null)}
-        onOk={() => form.submit()}
+        title="Category details"
+        open={Boolean(viewing)}
+        footer={null}
+        onCancel={() => setViewing(null)}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={(values) => {
-            save(values);
-            setEditing(null);
-            form.resetFields();
-            messageApi.success("Category saved.");
-          }}
-        >
-          <Form.Item
-            name="name"
-            label="Category name"
-            rules={[{ required: true, whitespace: true }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
+        {viewing ? (
+          <Descriptions column={1} bordered size="small">
+            <Descriptions.Item label="Category">{viewing.name}</Descriptions.Item>
+            <Descriptions.Item label="Amount Spent">
+              {money(spendingByCategory.get(viewing.name) || 0)}
+            </Descriptions.Item>
+          </Descriptions>
+        ) : null}
       </Modal>
     </Card>
   );

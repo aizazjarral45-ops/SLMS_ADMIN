@@ -3,8 +3,11 @@ import { BookOutlined, RobotOutlined, WalletOutlined } from "@ant-design/icons";
 import { useAdminWorkspace } from "../../lib/adminWorkspace";
 import "./CopilotAnalytics.css";
 export default function CopilotAnalytics() {
-  const { data } = useAdminWorkspace();
+  const { data, filterByStudent } = useAdminWorkspace();
   const settings = data.settings?.aiSettings || {};
+  const messageCount = filterByStudent(data.aiSearchHistory).filter(
+    (row) => row.role === undefined || row.role === "user",
+  ).length;
   return (
     <Row gutter={[16, 16]} className="copilot-analytics-feature">
       <Col xs={24} md={8}>
@@ -14,9 +17,9 @@ export default function CopilotAnalytics() {
           </div>
           <Statistic
             title="Messages"
-            value={data.copilotMessages?.length || 0}
+            value={messageCount}
           />
-          <Tag color="blue">Shared message log</Tag>
+          <Tag color="blue">Messages sent in session</Tag>
         </Card>
       </Col>
       <Col xs={24} md={8}>
