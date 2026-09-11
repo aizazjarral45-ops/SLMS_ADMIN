@@ -1,7 +1,30 @@
 .settings-reminders {
+  min-width: 0;
   width: 100%;
 }
 
 .settings-reminders .reminders-page-embedded {
   padding-top: 0;
+}
+
+.settings-reminders .record-workspace {
+  min-width: 0;
+}
+
+.settings-reminders .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+  .settings-reminders .ant-table colgroup > col:last-child {
+    width: 76px !important;
+  }
+
+  .settings-reminders .ant-table-thead > tr > th:last-child,
+  .settings-reminders .ant-table-tbody > tr > td:last-child,
+  .settings-reminders .ant-table-cell-fix-right {
+    max-width: 76px !important;
+    min-width: 76px !important;
+    width: 76px !important;
+  }
 }

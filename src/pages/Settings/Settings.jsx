@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button, Tag } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
+import StudentSelector from "../../components/Admin/StudentSelector";
 import { useAdminWorkspace } from "../../lib/adminWorkspace";
 import "../../components/Admin/AdminShared.css";
 import "./Settings.css";
@@ -9,34 +10,30 @@ import SettingsOverview from "./SettingsOverview";
 import SettingsAnalytics from "./SettingsAnalytics";
 import SettingsReminders from "./SettingsReminders";
 import SettingsSecurity from "./SettingsSecurity";
+import SettingsProfile from "./SettingsProfile";
+import SettingsLoginHistory from "./SettingsLoginHistory";
 
 const panels = [
   { key: "overview", label: "Settings Overview" },
   { key: "analytics", label: "Analytics" },
   { key: "reminders", label: "Reminders" },
-  { key: "security", label: "Security" },
+  { key: "security", label: "Logout" },
+  { key: "profile", label: "Student Profile" },
+  { key: "login-history", label: "Login History" },
 ];
 
 const normalizePanel = (value) =>
   panels.some((panel) => panel.key === value) ? value : "overview";
 
 export default function Settings() {
-  const location = useLocation();
   const navigate = useNavigate();
   const { panel: routePanel } = useParams();
   const { data } = useAdminWorkspace();
-  const [panel, setPanel] = useState(() => normalizePanel(location.state?.panel || routePanel || "overview"));
-
-  useEffect(() => {
-    const nextPanel = normalizePanel(location.state?.panel || routePanel || "overview");
-    // Avoid synchronous setState during render cycles: defer update only when needed
-    if (nextPanel !== panel) setTimeout(() => setPanel(nextPanel), 0);
-  }, [location.state?.panel, routePanel, panel]);
+  const panel = normalizePanel(routePanel || "overview");
 
   const handlePanelChange = (nextPanel) => {
     const normalized = normalizePanel(nextPanel);
-    setPanel(normalized);
-    navigate(`/settings/${normalized}`, { replace: false });
+    navigate(normalized === "overview" ? "/settings" : `/settings/${normalized}`);
   };
 
   const reminderCount = useMemo(
@@ -49,15 +46,8 @@ export default function Settings() {
 
   const summary = useMemo(() => {
     const security = data?.settings?.security || {};
-    const activeModules = [
-      !!(data?.settings?.notifications && Object.values(data.settings.notifications).some(Boolean)),
-      !!(data?.settings?.security && Object.keys(security).length),
-      reminderCount > 0,
-    ].filter(Boolean).length;
-
     return {
       securityStatus: security.mfaEnabled ? "Protected" : "Review required",
-      activeModules,
       reminderCount,
     };
   }, [data, reminderCount]);
@@ -70,6 +60,10 @@ export default function Settings() {
         return <SettingsReminders />;
       case "security":
         return <SettingsSecurity />;
+      case "login-history":
+        return <SettingsLoginHistory />;
+      case "profile":
+        return <SettingsProfile />;
       case "overview":
       default:
         return <SettingsOverview data={data} onSelectPanel={handlePanelChange} />;
@@ -83,15 +77,16 @@ export default function Settings() {
           <Tag className="dashboard-eyebrow">ADMINISTRATION</Tag>
           <h1>Settings</h1>
           <p>
-            Manage the platform, communication preferences, reporting, and
-            security controls from a single workspace.
+            Review reminders, security history, profile access, and session
+            controls for the selected student from one workspace.
           </p>
           <div className="settings-hero-actions">
+            <StudentSelector />
             <Button type="primary" onClick={() => handlePanelChange("overview")}>
               Settings overview
             </Button>
             <Button className="dashboard-secondary-btn" onClick={() => handlePanelChange("security")}>
-              Security controls
+              Security & history
             </Button>
           </div>
         </div>
@@ -101,7 +96,7 @@ export default function Settings() {
           </div>
           <h3>Workspace status</h3>
           <span>
-            {summary.securityStatus} · {summary.activeModules} modules active
+            {summary.securityStatus} · Settings workspace active
           </span>
           <Button type="link" onClick={() => handlePanelChange("analytics")}>
             Review analytics

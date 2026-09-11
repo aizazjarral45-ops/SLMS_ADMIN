@@ -11,6 +11,8 @@ function clearStoredAuthentication() {
     storage.removeItem("slms_access_token");
     storage.removeItem("token");
   }
+  window.sessionStorage.removeItem("slms-selected-student-id");
+  window.sessionStorage.removeItem("slms-selected-student-name");
   document.cookie.split(";").forEach((cookie) => {
     const name = cookie.split("=")[0].trim();
     if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
@@ -80,7 +82,7 @@ export function AuthProvider({ children }) {
       logout: async () => {
         try {
           if (admin?.token) {
-            await adminRequest("/auth/logout", { method: "POST" });
+            await adminRequest("/admin/logout", { method: "POST" });
           }
         } finally {
           clearStoredAuthentication();

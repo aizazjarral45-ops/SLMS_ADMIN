@@ -225,6 +225,7 @@ function AdminShell() {
       adminRequest("/hostel"),
       adminRequest("/notifications"),
       adminRequest("/assignments"),
+      adminRequest("/settings/admin"),
     ]).then((results) => {
       if (cancelled) return;
       const [
@@ -234,6 +235,7 @@ function AdminShell() {
         hostel,
         notifications,
         assignments,
+        adminSettings,
       ] = results;
       const workspaceData =
         workspace.status === "fulfilled" ? workspace.value : null;
@@ -268,6 +270,17 @@ function AdminShell() {
                 []
               : current.academic?.assignments || [],
         },
+        settings:
+          adminSettings.status === "fulfilled"
+            ? {
+                ...current.settings,
+                ...(adminSettings.value.settings || {}),
+              }
+            : current.settings,
+        account:
+          adminSettings.status === "fulfilled"
+            ? adminSettings.value.account || current.account
+            : current.account,
       }));
     }).finally(() => {
       if (!cancelled) setWorkspaceLoading(false);

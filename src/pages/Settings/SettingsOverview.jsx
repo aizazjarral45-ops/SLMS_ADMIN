@@ -1,40 +1,37 @@
 import {
-  BarChartOutlined,
   BellOutlined,
+  HistoryOutlined,
   LockOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Col, Row, Space, Tag } from "antd";
+import { Button, Card, Col, Row, Tag } from "antd";
 import "./SettingsOverview.css";
 
 export default function SettingsOverview({ data, onSelectPanel }) {
-  const notifications = data?.settings?.notifications || {};
-  const preferences = data?.admin?.preferences || {};
-  const activeNotifications = Object.values(notifications).filter(Boolean).length;
-  const reminderCount = (data?.settings?.reminders || []).filter(
+  const reminderCount = (data?.reminders || data?.settings?.reminders || []).filter(
     (row) => row.done !== "Done" && row.done !== true,
   ).length;
 
   const cards = [
     {
-      title: "Security posture",
-      value: `${data?.settings?.security?.mfaEnabled ? "MFA" : "No MFA"} enabled`,
-      icon: <LockOutlined />,
-      detail: `Timeout ${data?.settings?.security?.sessionTimeoutMinutes || 30} mins`,
-      action: () => onSelectPanel?.("security"),
-    },
-    {
-      title: "Communication channels",
-      value: `${activeNotifications} active alerts`,
+      title: "Reminders",
+      value: `${reminderCount} open reminders`,
       icon: <BellOutlined />,
-      detail: `${preferences.weeklyDigest ? "Digest on" : "Digest off"} · ${preferences.compactTables ? "Compact" : "Standard"}`,
+      detail: "Review reminders for the selected student",
       action: () => onSelectPanel?.("reminders"),
     },
     {
-      title: "Operational reporting",
-      value: `${reminderCount} open reminders`,
-      icon: <BarChartOutlined />,
-      detail: "Analytics reflect live SLMS activity",
-      action: () => onSelectPanel?.("analytics"),
+      title: "Logout",
+      value: "Protected workspace",
+      icon: <LockOutlined />,
+      detail: "Manage the current administrator session",
+      action: () => onSelectPanel?.("security"),
+    },
+    {
+      title: "Login History",
+      value: "Student activity",
+      icon: <HistoryOutlined />,
+      detail: "View the selected student's access history",
+      action: () => onSelectPanel?.("login-history"),
     },
   ];
 
@@ -59,41 +56,6 @@ export default function SettingsOverview({ data, onSelectPanel }) {
         ))}
       </Row>
 
-      <Card className="admin-panel settings-overview-card" title="Workspace configuration">
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <div className="settings-overview-row">
-            <div>
-              <strong>Theme</strong>
-              <p>{data?.settings?.theme || "Light"}</p>
-            </div>
-            <div>
-              <strong>Admin preferences</strong>
-              <p>{preferences.autoAssignComplaints ? "Auto-assign enabled" : "Manual assignment"}</p>
-            </div>
-          </div>
-          <div className="settings-overview-row">
-            <div>
-              <strong>Security policy</strong>
-              <p>{data?.settings?.security?.passwordPolicy || "High"}</p>
-            </div>
-            <div>
-              <strong>Module access</strong>
-              <p>Settings, analytics, reminders, and security controls available</p>
-            </div>
-          </div>
-        </Space>
-        <div className="settings-overview-actions">
-          <Button type="primary" onClick={() => onSelectPanel?.("security")}>
-            Manage security
-          </Button>
-          <Button className="dashboard-secondary-btn" onClick={() => onSelectPanel?.("analytics")}>
-            Open analytics
-          </Button>
-          <Button className="dashboard-secondary-btn" onClick={() => onSelectPanel?.("reminders")}>
-            Review reminders
-          </Button>
-        </div>
-      </Card>
     </div>
   );
 }

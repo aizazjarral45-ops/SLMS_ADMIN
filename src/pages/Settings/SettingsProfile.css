@@ -1,0 +1,126 @@
+.settings-profile-card .ant-card-body {
+  padding: 0 24px 24px;
+}
+
+.settings-profile-header {
+  overflow: hidden;
+  margin: 0 -24px 24px;
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+}
+
+.settings-profile-banner {
+  height: 164px;
+  background:
+    radial-gradient(circle at 78% 20%, rgba(147, 197, 253, 0.28), transparent 28%),
+    linear-gradient(120deg, #102a43 0%, #1d4ed8 52%, #2563eb 100%);
+}
+
+.settings-profile-header-content {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 0 20px 8px;
+  text-align: center;
+}
+
+.settings-profile-header-content .ant-typography {
+  margin: 0;
+}
+
+.settings-profile-header-content h2.ant-typography {
+  margin-top: 12px;
+  color: #0f172a;
+}
+
+.settings-profile-name {
+  margin-top: 2px !important;
+  color: #334155 !important;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.settings-profile-header-content .ant-typography-secondary {
+  margin-top: 2px;
+}
+
+.settings-profile-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 128px;
+  height: 128px;
+  margin-top: -64px;
+  overflow: hidden;
+  border: 6px solid #fff;
+  border-radius: 50%;
+  background: #dbeafe;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+}
+
+.settings-profile-image,
+.settings-profile-avatar {
+  flex: 0 0 auto;
+}
+
+.settings-profile-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.settings-profile-avatar {
+  width: 100% !important;
+  height: 100% !important;
+  color: #1e3a8a;
+  background: #dbeafe;
+}
+
+.settings-profile-academic-card,
+.settings-profile-info-card {
+  height: 100%;
+}
+
+.settings-profile-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-profile-section-title .ant-avatar {
+  color: #fff;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+}
+
+.settings-profile-card .ant-descriptions-item-label {
+  white-space: normal;
+}
+
+@media (max-width: 576px) {
+  .settings-profile-card .ant-card-body {
+    padding: 0 16px 16px;
+  }
+
+  .settings-profile-header {
+    margin-right: -16px;
+    margin-left: -16px;
+  }
+
+  .settings-profile-banner {
+    height: 132px;
+  }
+
+  .settings-profile-photo {
+    width: 104px;
+    height: 104px;
+    margin-top: -52px;
+    border-width: 5px;
+  }
+
+  .settings-profile-header-content h2.ant-typography {
+    font-size: 24px;
+  }
+}
