@@ -14,23 +14,18 @@ import {
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useAdminWorkspace } from "../../lib/adminWorkspace";
+import { useAuth } from "../../context/AuthContext";
 import "../../components/Admin/AdminShared.css";
 import "./Profile.css";
-const defaultProfile = {
-  id: "USR-001",
-  name: "SLMS Administrator",
-  email: "admin@slms.com",
-  role: "System Administrator",
-  status: "Active",
-};
 export default function Profile() {
   const navigate = useNavigate();
   const { data, commit } = useAdminWorkspace();
+  const { admin } = useAuth();
   const [form] = Form.useForm();
   const [messageApi, holder] = message.useMessage();
   const profile = useMemo(
-    () => ({ ...defaultProfile, ...(data.admin?.users?.[0] || {}) }),
-    [data.admin?.users],
+    () => ({ ...(admin || {}), ...(data.admin?.users?.[0] || {}) }),
+    [admin, data.admin?.users],
   );
   useEffect(() => {
     form.setFieldsValue(profile);

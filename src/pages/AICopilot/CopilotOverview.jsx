@@ -17,7 +17,7 @@ export default function CopilotOverview() {
       title="Student search history"
       extra={
         <Tag color="blue">
-          {data.copilotMessages?.length || 0} messages
+          {data.aiSearchHistory?.length || 0} messages
         </Tag>
       }
     >

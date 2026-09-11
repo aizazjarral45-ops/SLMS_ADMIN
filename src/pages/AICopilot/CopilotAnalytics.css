@@ -1,3 +1,8 @@
+.copilot-analytics-feature {
+  min-width: 0;
+}
+
 .copilot-analytics-feature .admin-stat-card {
+  height: 100%;
   min-height: 160px;
 }

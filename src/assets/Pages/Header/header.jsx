@@ -1,4 +1,4 @@
-import { Avatar, Badge, Button, Space, Typography } from "antd";
+import { Avatar, Badge, Button, Popconfirm, Space, Typography } from "antd";
 import {
   BellOutlined,
   LogoutOutlined,
@@ -108,31 +108,49 @@ function Header({ unreadCount = 0, onToggleSidebar, updateData }) {
           />
         </Badge>
         <div className="profile-parent">
-          <Avatar className="profile-avatar" size={40}>
-            {initials}
-          </Avatar>
-          <div className="header-profile-copy">
+          <button
+            type="button"
+            className="profile-avatar-link"
+            aria-label="Open admin profile"
+            onClick={() => navigate("/profile")}
+          >
+            <Avatar className="profile-avatar" size={40}>
+              {initials}
+            </Avatar>
+          </button>
+          <button
+            type="button"
+            className="header-profile-copy"
+            aria-label="Open admin profile"
+            onClick={() => navigate("/profile")}
+          >
             <Text className="student-name">
               {admin?.name || "SLMS Administrator"}
             </Text>
             <Text className="student-dept">
               {admin?.role || "System Administrator"}
             </Text>
-          </div>
+          </button>
           <Button
             type="text"
             icon={<SettingOutlined />}
             className="header-icon-button header-settings-button"
-            aria-label="Admin settings"
+            aria-label="Open admin profile"
             onClick={() => navigate("/settings")}
           />
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            className="header-icon-button header-logout-button"
-            aria-label="Log out"
-            onClick={handleLogout}
-          />
+          <Popconfirm
+            title="Log out of your account?"
+            okText="Log out"
+            cancelText="Cancel"
+            onConfirm={handleLogout}
+          >
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              className="header-icon-button header-logout-button"
+              aria-label="Log out"
+            />
+          </Popconfirm>
         </div>
       </Space>
     </header>

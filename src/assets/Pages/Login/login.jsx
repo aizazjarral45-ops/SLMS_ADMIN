@@ -42,10 +42,6 @@ function Login() {
       await login({
         email,
         password,
-        name:
-          email === "admin@slms.com"
-            ? "SLMS Administrator"
-            : email.split("@")[0].replace(/[._-]/g, " "),
       });
       message.success("Welcome to the SLMS Admin Portal.");
       const redirect = new URLSearchParams(window.location.search).get("redirect");
@@ -84,9 +80,7 @@ function Login() {
           form={form}
           layout="vertical"
           initialValues={{
-            email:
-              window.localStorage.getItem("slms_admin_remembered_email") ||
-              "admin@slms.com",
+            email: window.localStorage.getItem("slms_admin_remembered_email") || "",
             rememberMe: true,
           }}
           onFinish={onFinish}
@@ -105,7 +99,7 @@ function Login() {
             <Input
               prefix={<MailOutlined />}
               size="large"
-              placeholder="admin@slms.com"
+              placeholder="Administrator email"
             />
           </Form.Item>
           <Form.Item
@@ -129,9 +123,6 @@ function Login() {
             Sign in to Admin
           </Button>
         </Form>
-        <Paragraph className="login-demo-note">
-          Use your configured SLMS administrator credentials.
-        </Paragraph>
       </Card>
     </main>
   );

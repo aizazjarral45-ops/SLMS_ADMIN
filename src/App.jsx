@@ -42,7 +42,6 @@ import Hostel from "./pages/Hostel/Hostel";
 import Expense from "./pages/Expense/Expense";
 import Complaints from "./pages/Complaints/Complaints";
 import Notifications from "./pages/Notifications/Notifications";
-import Users from "./pages/Users/Users";
 import Settings from "./pages/Settings/Settings";
 import Profile from "./pages/Profile/Profile";
 import NotFound from "./pages/NotFound";
@@ -133,7 +132,6 @@ function AdminShell() {
       setTimeout(() => setData(loadSharedData()), 0);
       console.error("Failed to load shared data:", e);
     } finally {
-      // Defer removal of loading to ensure a smooth transition
       setTimeout(() => setInitialLoading(false), 120);
     }
   }, []);
@@ -142,13 +140,10 @@ function AdminShell() {
   const [globalLoading, setGlobalLoading] = useState(false);
 
   const updateData = useCallback((nextValue) => {
-    // Show a brief loading indicator while persisting updates
     setGlobalLoading(true);
-    // Persist and update
     setData((current) => {
       const nextRaw =
         typeof nextValue === "function" ? nextValue(current) : nextValue;
-      // Persist the candidate next state to normalize it first
       let next = isAdminApiConfigured ? nextRaw : persistSharedData(nextRaw);
 
       // Helper to create a notification entry
@@ -199,14 +194,6 @@ function AdminShell() {
 
       if (addedNotifications.length) {
         next = persistSharedData({ ...next, notifications: [...(next.notifications || []), ...addedNotifications] });
-        // Dispatch a lightweight event for any other listeners (backwards compatibility)
-        try {
-          window.dispatchEvent(new CustomEvent("slms-notification-created", { detail: { count: addedNotifications.length } }));
-        } catch (e) {
-          // Ignore errors when dispatching the event in restricted environments
-          // Log at debug level to aid local troubleshooting if needed
-          console.debug("slms notification dispatch failed", e);
-        }
       }
 
       return next;
@@ -491,7 +478,6 @@ function AppRoutes() {
           <Route path="/notifications/:panel" element={<Notifications />} />
           <Route path="/reminders" element={<Navigate to="/settings/reminders" replace />} />
           <Route path="/analytics" element={<Navigate to="/settings/analytics" replace />} />
-          <Route path="/users" element={<Users />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/settings/:panel" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />

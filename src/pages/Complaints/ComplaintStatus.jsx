@@ -1,37 +1,47 @@
-import { Card, Empty, Select, Space, Tag, Typography } from "antd";
+import { Card, Empty, Select, Space, Tag, Typography, message } from "antd";
 import {
   idOf,
   studentNameForRecord,
   useAdminWorkspace,
   tagColor,
 } from "../../lib/adminWorkspace";
+import { adminRequest, isAdminApiConfigured } from "../../api/client";
 import "./ComplaintStatus.css";
 export default function ComplaintStatus({ selectedId }) {
-  const { data, admin, commit, filterByStudent } = useAdminWorkspace();
+  const { data, admin, updateData, filterByStudent } = useAdminWorkspace();
   const rows = filterByStudent(data.complaints);
-  const update = (row, status) =>
-    commit(
-      (current) => ({
+  const [messageApi, contextHolder] = message.useMessage();
+  const update = async (row, status) => {
+    if (!isAdminApiConfigured) {
+      messageApi.error("Complaint updates require a configured API.");
+      return;
+    }
+    try {
+      const result = await adminRequest(`/complaints/${idOf(row)}/status`, {
+        method: "PATCH",
+        body: { status },
+      });
+      const updatedComplaint = result.complaint || result.record;
+      if (!updatedComplaint) {
+        throw new Error("The API did not return the updated complaint.");
+      }
+      updateData?.((current) => ({
         ...current,
         complaints: current.complaints.map((item) =>
-          idOf(item) === idOf(row)
-            ? { ...item, status, updatedAt: new Date().toISOString() }
-            : item,
+          idOf(item) === idOf(updatedComplaint) ? updatedComplaint : item,
         ),
-      }),
-      {
-        module: "complaints",
-        title: `${row.title || "Complaint"} status changed to ${status}`,
-        studentId: row.studentId,
-        refId: row.id,
-        notify: true,
-      },
-    );
+      }));
+      messageApi.success("Complaint status updated.");
+    } catch (error) {
+      messageApi.error(error.message || "Unable to update complaint status.");
+    }
+  };
   return (
     <Card
       className="admin-panel complaint-status-feature"
       title="Status tracking"
     >
+      {contextHolder}
       {rows.length ? (
         rows.map((row) => (
           <div
@@ -53,7 +63,7 @@ export default function ComplaintStatus({ selectedId }) {
               <Select
                 value={row.status || "Submitted"}
                 onChange={(value) => update(row, value)}
-                options={["Submitted", "In Progress", "Resolved", "Closed"].map(
+                options={["Submitted", "Pending", "In Progress", "Resolved", "Rejected", "Closed"].map(
                   (value) => ({ value, label: value }),
                 )}
               />

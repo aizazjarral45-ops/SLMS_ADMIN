@@ -13,9 +13,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const navigationItems = [
   { key: "/", icon: <AppstoreOutlined />, label: "Dashboard" },
-  { key: "/students", icon: <TeamOutlined />, label: "Students" },
+   { key: "/copilot", icon: <RobotOutlined />, label: "AI Copilot" },
+   { key: "/students", icon: <TeamOutlined />, label: "Students" },
   { key: "/academic", icon: <BookOutlined />, label: "Academic" },
-  { key: "/copilot", icon: <RobotOutlined />, label: "AI Copilot" },
+ 
   { key: "/hostel", icon: <HomeOutlined />, label: "Hostel" },
   { key: "/expense", icon: <WalletOutlined />, label: "Expense" },
   {
@@ -23,7 +24,6 @@ const navigationItems = [
     icon: <SafetyCertificateOutlined />,
     label: "Complaints",
   },
-  // { key: "/users", icon: <UserOutlined />, label: "Users" },
   // { key: "/profile", icon: <UserOutlined />, label: "Profile" },
   { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
 ];

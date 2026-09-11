@@ -4,12 +4,11 @@ import { RobotOutlined } from "@ant-design/icons";
 import { Button, Space, Tag } from "antd";
 import CopilotOverview from "./CopilotOverview";
 import CopilotAnalytics from "./CopilotAnalytics";
-import CopilotSettings from "./CopilotSettings";
 import CopilotHistory from "./CopilotHistory";
 import StudentSelector from "../../components/Admin/StudentSelector";
 import "../../components/Admin/AdminShared.css";
 import "./AICopilot.css";
-const panels = ["overview", "history", "analytics", "settings"];
+const panels = ["overview", "history", "analytics"];
 const normalize = (value) => (panels.includes(value) ? value : "overview");
 export default function AICopilot() {
   const location = useLocation();
@@ -33,7 +32,6 @@ export default function AICopilot() {
         overview: <CopilotOverview />,
         analytics: <CopilotAnalytics />,
         history: <CopilotHistory />,
-        settings: <CopilotSettings />,
       })[panel],
     [panel],
   );
@@ -49,12 +47,6 @@ export default function AICopilot() {
           <Space wrap>
             <Button type="primary" onClick={() => setPanel("overview")}>
               Open message log
-            </Button>
-            <Button
-              className="dashboard-secondary-btn"
-              onClick={() => setPanel("settings")}
-            >
-              Manage settings
             </Button>
             <StudentSelector />
           </Space>

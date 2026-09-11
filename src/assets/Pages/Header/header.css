@@ -26,6 +26,25 @@
   display: none;
   font-size: 24px;
 }
+.header-menu-toggle,
+.header-icon-button {
+  border-radius: 10px !important;
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+.header-menu-toggle:hover,
+.header-icon-button:hover {
+  background: rgba(219, 234, 254, 0.16) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+.header-menu-toggle:focus-visible,
+.header-icon-button:focus-visible,
+.admin-wordmark:focus-visible,
+.profile-avatar-link:focus-visible,
+.header-profile-copy:focus-visible {
+  outline: 2px solid #bfdbfe;
+  outline-offset: 2px;
+}
 .admin-wordmark {
   align-items: center;
   background: transparent;
@@ -36,6 +55,11 @@
   gap: 12px;
   padding: 0;
   text-align: left;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.admin-wordmark:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 .admin-wordmark-mark {
   align-items: center;
@@ -75,6 +99,24 @@
   gap: 10px;
   min-width: 0;
 }
+.profile-avatar-link,
+.header-profile-copy {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.profile-avatar-link {
+  border-radius: 50%;
+  display: inline-flex;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+.profile-avatar-link:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
 .profile-avatar {
   background: #dbeafe !important;
   border: 2px solid #5770b7;
@@ -83,6 +125,11 @@
 }
 .header-profile-copy {
   min-width: 0;
+  text-align: left;
+  transition: opacity 180ms ease;
+}
+.header-profile-copy:hover {
+  opacity: 0.86;
 }
 .student-name,
 .student-dept {
