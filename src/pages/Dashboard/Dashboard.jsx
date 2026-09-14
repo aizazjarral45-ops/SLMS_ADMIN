@@ -6,9 +6,13 @@ import {
   BookOutlined,
   CheckCircleOutlined,
   DollarOutlined,
+  FileTextOutlined,
   HomeOutlined,
+  MailOutlined,
   RobotOutlined,
+  SearchOutlined,
   TeamOutlined,
+  UserOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 import {
@@ -193,30 +197,64 @@ export default function Dashboard() {
       </section>
       {selectedStudentId ? (
         <Card
-          className="dashboard-card dashboard-student-context"
-          title={`Selected student: ${selectedStudent?.name || selectedStudentId}`}
+          className="dashboard-card dashboard-student-context dashboard-student-overview"
         >
-          <Paragraph type="secondary">
-            {selectedStudent?.email || "Connected student record"}
-          </Paragraph>
-          <Row gutter={[16, 16]}>
+          <div className="dashboard-student-overview-header">
+            <div className="dashboard-student-avatar" aria-hidden="true">
+              <UserOutlined />
+            </div>
+            <div className="dashboard-student-identity">
+              <div className="dashboard-student-kicker">Selected student</div>
+              <Title level={3}>
+                {selectedStudent?.name || selectedStudentId}
+              </Title>
+              <Paragraph type="secondary">
+                <MailOutlined />{" "}
+                {selectedStudent?.email || "Connected student record"}
+              </Paragraph>
+            </div>
+          </div>
+          <div className="dashboard-student-stats-heading">
+            <div>
+              <Title level={4}>Student overview</Title>
+              <Text type="secondary">
+                A quick view of this student&apos;s connected activity.
+              </Text>
+            </div>
+          </div>
+          <Row gutter={[16, 16]} className="dashboard-student-stats">
             <Col xs={24} sm={8}>
+              <div className="dashboard-student-stat">
+                <div className="dashboard-student-stat-icon assignments">
+                  <FileTextOutlined />
+                </div>
               <Statistic
                 title="Assignments"
                 value={filterByStudent(data.academic?.assignments).length}
               />
+              </div>
             </Col>
             <Col xs={24} sm={8}>
-              <Statistic
-                title="Attendance records"
-                value={filterByStudent(data.academic?.attendance).length}
-              />
+              <div className="dashboard-student-stat">
+                <div className="dashboard-student-stat-icon attendance">
+                  <CheckCircleOutlined />
+                </div>
+                <Statistic
+                  title="Attendance records"
+                  value={filterByStudent(data.academic?.attendance).length}
+                />
+              </div>
             </Col>
             <Col xs={24} sm={8}>
-              <Statistic
-                title="Search history"
-                value={filterByStudent(data.aiSearchHistory).length}
-              />
+              <div className="dashboard-student-stat">
+                <div className="dashboard-student-stat-icon search">
+                  <SearchOutlined />
+                </div>
+                <Statistic
+                  title="Search history"
+                  value={filterByStudent(data.aiSearchHistory).length}
+                />
+              </div>
             </Col>
           </Row>
         </Card>
